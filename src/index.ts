@@ -4,10 +4,10 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
 import appRouter from './routes/index';
-import connect from './configs/database.config';
+import db from './configs/database.config';
 
 //Connect to db
-connect();
+db.connect();
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,9 +18,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use('', appRouter);
 
-app.get('/', (req: Request, res: Response, next: NextFunction) => {
-  res.send('hello ts-node');
-});
 
 app.listen(port, () => {
   return console.log(`Server is listening at http://localhost:${port}`);

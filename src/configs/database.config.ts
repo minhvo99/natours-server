@@ -1,27 +1,32 @@
 import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
 dotenv.config();
 
-const { CLUSTER, MONGODB_USER, MONGODB_PASSWORD, ENV } = process.env;
+const { MONGODB_USER, MONGODB_PASSWORD,MONGODB_HOST,MONGODB_DB } = process.env;
 
 const username = encodeURIComponent(`${MONGODB_USER}`);
-const password = encodeURIComponent(`${MONGODB_PASSWORD}`);
-const cluster = CLUSTER;
+const password = encodeURIComponent(`${MONGODB_PASSWORD}`); 
+const uri = `mongodb+srv://${username}:${password}@${MONGODB_HOST}/${MONGODB_DB}?retryWrites=true`;
 
-const uri = `mongodb+srv://${username}:${password}@${cluster}.rscee18.mongodb.net/`;
-
-const client = new MongoClient(uri);
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+  connectTimeoutMS: 30000, 
+  socketTimeoutMS: 30000 
+});
 
 const connect = async () => {
   try {
     await client.connect();
-    console.log('Connected!!!');
+    await client.db("admin").command({ ping: 1 });
+    console.log("You successfully connected to MongoDB!");
   } catch (err: any) {
     console.log('Fail to connect to DB: ', err);
-  } finally {
-    await client.close();
   }
 };
 
-export default connect;
+export default { connect };
