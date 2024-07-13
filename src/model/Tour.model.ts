@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, {Schema} from "mongoose";
 
 const tourSchemas =  new Schema({
     name: {
@@ -15,6 +15,7 @@ const tourSchemas =  new Schema({
         required: [true, 'A tour must have a price']
     }
 })
+
 const Tour = mongoose.model('Tour', tourSchemas)
 
 export default Tour;

@@ -15,16 +15,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 dotenv_1.default.config();
-const { CLUSTER, MONGODB_USER, MONGODB_PASSWORD, ENV } = process.env;
-const encodedPassword = encodeURIComponent(MONGODB_PASSWORD || '');
-const uri = `mongodb+srv://${MONGODB_USER}:${encodedPassword}@${CLUSTER}.rscee18.mongodb.net/`;
+const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB } = process.env;
+const username = encodeURIComponent(`${MONGODB_USER}`);
+const password = encodeURIComponent(`${MONGODB_PASSWORD}`);
+const uri = `mongodb+srv://${username}:${password}@${MONGODB_HOST}/${MONGODB_DB}?retryWrites=true`;
 const connect = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield mongoose_1.default.connect(uri);
-        console.log('Connected');
+        console.log("Database connected successfully!");
     }
     catch (err) {
-        console.log('Fail to connect to database: ', err);
+        console.log('Fail to connect to DB: ', err);
     }
 });
-exports.default = connect;
+exports.default = { connect };

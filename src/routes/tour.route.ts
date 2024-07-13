@@ -1,8 +1,11 @@
 import express from 'express';
-import { getAllTour } from './../controllers/Tour.controller'
+import tourController from './../controllers/Tour.controller'
 
 const tourRoute = express.Router();
 
-tourRoute.get('/', getAllTour)
+tourRoute.get('/', tourController.getAllTour);
+tourRoute.get('/:id', tourController.getTourbyId);
+tourRoute.post('/', tourController.createTour);
+tourRoute.put('/:id', tourController.updateTour);
 
 export default tourRoute;
