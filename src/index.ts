@@ -16,9 +16,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use('/api/v1', appRouter);
 
-
 app.listen(port, () => {
-  return console.log(`Server is listening at http://localhost:${port}`);
+   return console.log(`Server is listening at http://localhost:${port}`);
 });
 
 export default app;

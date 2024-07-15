@@ -5,7 +5,7 @@
       "dev": "nodemon --watch src --exec ts-node src/index.ts",
       "build": "npx tsc",
       "start": "npm run build && nodemon dist/index.js",
-      "prettier": "prettiern '{src,/**/*.ts}' --write --single-quote --trailing-comma all"
+      "prettier": "prettier '{src,/**/*.ts}' --write --single-quote --trailing-comma all"
    },
    "dependencies": {
       "@types/cors": "^2.8.17",

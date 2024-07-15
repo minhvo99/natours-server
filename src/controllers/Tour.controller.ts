@@ -7,6 +7,7 @@ class TourController {
          const tours = await Tour.find();
          res.status(200).json({
             message: 'Get all tour is successfuly!',
+            total: tours.length,
             data: tours,
          });
       } catch (error) {
@@ -18,19 +19,19 @@ class TourController {
    }
 
    async getTourbyId(req: Request, res: Response, next: NextFunction) {
-    try {
-      const tour = await Tour.findById(req.params.id);
-      res.status(200).json({
-        message: 'Get tour by id successfully!',
-        data: tour,
-      });
-    } catch (error) {
-        res.json({
+      try {
+         const tour = await Tour.findById(req.params.id);
+         res.status(200).json({
+            message: 'Get tour by id successfully!',
+            data: tour,
+         });
+      } catch (error) {
+         res.json({
             message: `An error occurred: ${error}`,
-        });
-        next();
-        }
-    }
+         });
+         next();
+      }
+   }
 
    async createTour(req: Request, res: Response, next: NextFunction) {
       try {
@@ -53,17 +54,31 @@ class TourController {
             new: true,
             runValidators: true,
          });
-            res.status(200).json({
-                message: 'Update tour successfully!',
-                data: tour,
-            });
-        } catch (error) {
-            res.json({
-                message: `An error occurred: ${error}`,
-            });
-            next();
-        }
-    }
+         res.status(200).json({
+            message: 'Update tour successfully!',
+            data: tour,
+         });
+      } catch (error) {
+         res.json({
+            message: `An error occurred: ${error}`,
+         });
+         next();
+      }
+   }
+
+   async deleteTour(req: Request, res: Response, next: NextFunction) {
+      try {
+         await Tour.findByIdAndDelete(req.params.id);
+         res.status(204).json({
+            messgage: 'Delete tour successfully!',
+         });
+      } catch (error) {
+         res.status(400).json({
+            message: `Cannot delete tour id: ${req.params.id}`,
+            error: error,
+         });
+      }
+   }
 }
 
 export default new TourController();
