@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import Tour from '../model/Tour.model';
+import logger from '../logger/winston';
 
 class TourController {
    async getAllTour(req: Request, res: Response, next: NextFunction) {
@@ -11,10 +12,8 @@ class TourController {
             data: tours,
          });
       } catch (error) {
-         res.json({
-            message: `An error occurred: ${error}`,
-         });
-         next();
+         logger.error(`Get all tour error: ${error}`);
+         next(error);
       }
    }
 
@@ -26,10 +25,8 @@ class TourController {
             data: tour,
          });
       } catch (error) {
-         res.json({
-            message: `An error occurred: ${error}`,
-         });
-         next();
+         logger.error(`Get tour by id error: ${error}`);
+         next(error);
       }
    }
 
@@ -40,11 +37,9 @@ class TourController {
             message: 'Create a new tour successfully!',
             data: newTour,
          });
-      } catch (error) {
-         res.json({
-            message: `An error occurred: ${error}`,
-         });
-         next();
+      } catch (error: any) {
+         logger.error(`Create tour error: ${error}`);
+         next(error);
       }
    }
 
@@ -59,24 +54,20 @@ class TourController {
             data: tour,
          });
       } catch (error) {
-         res.json({
-            message: `An error occurred: ${error}`,
-         });
-         next();
+         logger.error(`Update tour error: ${error}`);
+         next(error);
       }
    }
 
    async deleteTour(req: Request, res: Response, next: NextFunction) {
       try {
          await Tour.findByIdAndDelete(req.params.id);
-         res.status(204).json({
-            messgage: 'Delete tour successfully!',
+         res.status(200).json({
+            messgage: `Delete tour id: ${req.params.id} successfully!`,
          });
       } catch (error) {
-         res.status(400).json({
-            message: `Cannot delete tour id: ${req.params.id}`,
-            error: error,
-         });
+         logger.error(`Delete tour error: ${error}`);
+         next(error);
       }
    }
 }

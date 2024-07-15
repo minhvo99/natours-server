@@ -14,13 +14,15 @@
       "cors": "^2.8.5",
       "dotenv": "^16.4.5",
       "express": "^4.17.1",
+      "joi": "^17.13.3",
       "mongodb": "^6.8.0",
       "mongoose": "^8.5.0",
       "morgan": "^1.10.0",
       "nodemon": "^3.1.4",
       "prettier": "^3.3.3",
       "ts-lib": "^0.0.5",
-      "ts-node": "^10.9.2"
+      "ts-node": "^10.9.2",
+      "winston": "^3.13.1"
    },
    "devDependencies": {
       "@babel/core": "^7.24.8",
