@@ -1,20 +1,20 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import logger from '../logger/winston';
 
 dotenv.config();
 
-const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB } = process.env;
+const { MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB, MONGODB_USER, CLUSTER } = process.env;
 
-const username = encodeURIComponent(`${MONGODB_USER}`);
 const password = encodeURIComponent(`${MONGODB_PASSWORD}`);
-const uri = `mongodb+srv://${username}:${password}@${MONGODB_HOST}/${MONGODB_DB}?retryWrites=true`;
+const uri = `mongodb+srv://${MONGODB_USER}:${password}@${MONGODB_HOST}/${MONGODB_DB}?retryWrites=true&w=majority&appName=${CLUSTER}`;
 
 const connect = async () => {
    try {
       await mongoose.connect(uri);
-      console.log('Database connected successfully!');
+      logger.info('Database connected successfully');
    } catch (err: any) {
-      console.log('Fail to connect to DB: ', err);
+      logger.error(`Database connection error: ${err}`);
    }
 };
 
