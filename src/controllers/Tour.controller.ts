@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
+import mongoose from 'mongoose';
 
 class TourController {
    async getAllTour(req: Request, res: Response, next: NextFunction) {
@@ -19,13 +20,29 @@ class TourController {
 
    async getTourbyId(req: Request, res: Response, next: NextFunction) {
       try {
-         const tour = await Tour.findById(req.params.id);
+         const { id } = req.params;
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+               message: 'Invalid id',
+            });
+         }
+         const tour = await Tour.findById(id);
+         if (!tour) {
+            return res.status(404).json({
+               status: 'fail',
+               message: 'Tour not found',
+            });
+         }
          res.status(200).json({
             message: 'Get tour by id successfully!',
             data: tour,
          });
       } catch (error) {
          logger.error(`Get tour by id error: ${error}`);
+         res.status(500).json({
+            status: 'error',
+            message: `Fail to get tour: ${error}`,
+         });
          next(error);
       }
    }
@@ -45,28 +62,53 @@ class TourController {
 
    async updateTour(req: Request, res: Response, next: NextFunction) {
       try {
+         const { id } = req.params;
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+               message: 'Invalid id',
+            });
+         }
          const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true,
          });
+         if (!tour) {
+            return res.status(404).json({
+               message: 'Tour not found',
+            });
+         }
          res.status(200).json({
             message: 'Update tour successfully!',
             data: tour,
          });
       } catch (error) {
          logger.error(`Update tour error: ${error}`);
+         res.status(500).json({
+            status: 'error',
+            message: `Fail to update tour: ${error}`,
+         });
          next(error);
       }
    }
 
    async deleteTour(req: Request, res: Response, next: NextFunction) {
       try {
-         await Tour.findByIdAndDelete(req.params.id);
+         const { id } = req.params;
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+               message: 'Invalid id',
+            });
+         }
+         await Tour.findByIdAndDelete(id);
          res.status(200).json({
-            messgage: `Delete tour id: ${req.params.id} successfully!`,
+            messgage: `Delete tour id: ${id} successfully!`,
          });
       } catch (error) {
          logger.error(`Delete tour error: ${error}`);
+         res.status(500).json({
+            status: 'error',
+            message: `Fail to delete tour: ${error}`,
+         });
          next(error);
       }
    }
