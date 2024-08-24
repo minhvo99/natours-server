@@ -63,6 +63,11 @@ class TourController {
    async updateTour(req: Request, res: Response, next: NextFunction) {
       try {
          const { id } = req.params;
+         if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+               message: 'Tour to update can not be empty!',
+            });
+         }
          if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                message: 'Invalid id',
@@ -74,7 +79,7 @@ class TourController {
          });
          if (!tour) {
             return res.status(404).json({
-               message: 'Tour not found',
+               message: 'fail to update tour',
             });
          }
          res.status(200).json({
