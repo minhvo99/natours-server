@@ -1,7 +1,7 @@
 import User from "../model/User.model";
 import { Request, Response, NextFunction } from "express";
 import logger from "../logger/winston";
-class UserController {
+export default class UserController {
     async getAllUsers (req: Request, res: Response, next: NextFunction) {
         try {
             const users = await User.find();
@@ -15,5 +15,3 @@ class UserController {
         }
     }
 }
-
-export default new UserController();

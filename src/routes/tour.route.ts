@@ -1,8 +1,9 @@
 import express from 'express';
-import tourController from './../controllers/Tour.controller';
+import TourController from './../controllers/Tour.controller';
 
 const tourRoute = express.Router();
-
+const tourController = new TourController();
+tourRoute.get('/top-5-cheap', tourController.aliasTopTours, tourController.getAllTour)
 tourRoute.get('/', tourController.getAllTour);
 tourRoute.get('/:id', tourController.getTourbyId);
 tourRoute.post('/', tourController.createTour);

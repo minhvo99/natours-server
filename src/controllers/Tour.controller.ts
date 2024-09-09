@@ -3,20 +3,63 @@ import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
 import mongoose from 'mongoose';
 
-class TourController {
+export default class TourController {
+
+   async aliasTopTours(req: Request, res: Response, next: NextFunction) {
+
+   }
    async getAllTour(req: Request, res: Response, next: NextFunction) {
       try {
-         const tours = await Tour.find();
+         const queryObj = { ...req.query };
+         const excludedFields = ['page', 'sort', 'limit', 'fields'];
+         excludedFields.forEach((field) => delete queryObj[field]);
+
+         let queryStr = JSON.stringify(queryObj);
+         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
+         let query = Tour.find(JSON.parse(queryStr));
+         // sort function
+         if (typeof req.query?.sort === 'string' && req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ');
+            query = query.sort(sortBy);
+         } else {
+            query = query.sort('-createdAt');
+         }
+         // fields limit function
+         if (typeof req.query?.fields === 'string' && req.query.fields) {
+            const fields = req.query.fields.split(',').join(' ');
+            query = query.select(fields);
+         } else {
+            query = query.select('-__v');
+         }
+
+         // pagination function
+         const limit = (req.query.limit as any) * 1 || 100;
+         const page = (req.query.page as any) * 1 || 1;
+         const skip = (page - 1) * limit;
+         query = query.skip(skip).limit(limit);
+         if (req.query.page) {
+            const numTours = await Tour.countDocuments();
+            if (skip >= numTours) throw new Error('This page does not exits!')
+            
+         }
+
+         const tours = await query;
          res.status(200).json({
-            message: 'Get all tour is successfuly!',
+            message: 'Get all tours successfully!',
             total: tours.length,
             data: tours,
          });
       } catch (error) {
-         logger.error(`Get all tour error: ${error}`);
+         logger.error(`Get all tours error: ${error}`);
+         res.status(500).json({
+            status: 'Fail to get tours',
+            message: error,
+         });
          next(error);
       }
    }
+
 
    async getTourbyId(req: Request, res: Response, next: NextFunction) {
       try {
@@ -118,5 +161,3 @@ class TourController {
       }
    }
 }
-
-export default new TourController();
