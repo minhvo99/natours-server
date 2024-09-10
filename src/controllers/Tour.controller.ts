@@ -6,8 +6,8 @@ import APIFeature from '../utils/apiFeature';
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
-   req.query.sort = '-ratingsAverage,price';
-   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+   req.query.sort = '-ratingsAvarage,price';
+   req.query.fields = 'name,price,ratingsAvarage,summary,difficulty';
    next();
 };
 
@@ -130,6 +130,93 @@ export const deleteTour = async (req: Request, res: Response, next: NextFunction
       res.status(500).json({
          status: 'error',
          message: `Fail to delete tour: ${error}`,
+      });
+      next(error);
+   }
+};
+
+export const getTourStast = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const stast = await Tour.aggregate([
+         {
+            $match: { ratingsAvarage: { $gte: 4.5 } },
+         },
+         {
+            $group: {
+               _id: { $toUpper: '$difficulty' },
+               numTours: { $sum: 1 },
+               numRatings: { $sum: '$ratingsQuantity' },
+               avgRating: { $avg: '$ratingsAvarage' },
+               avgPrice: { $avg: '$price' },
+               minPrice: { $min: '$price' },
+               maxPrice: { $max: '$price' },
+            },
+         },
+         {
+            $sort: { avgPrice: 1 },
+         },
+      ]);
+      res.status(200).json({
+         message: 'Get tour stast successfully!',
+         data: stast,
+      });
+   } catch (error) {
+      logger.error(`Get tour stats error: ${error}`);
+      res.status(500).json({
+         status: 'Fail to get tour stats',
+         message: error,
+      });
+      next(error);
+   }
+};
+
+export const getMonthlyPlan = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const year = (req.params.year as any) * 1;
+      const plan = await Tour.aggregate([
+         {
+            $unwind: "$startDates"
+          },
+          {
+            $match: {
+               $expr: {
+                  $and: [
+                    { $gte: [{ $toDate: "$startDates" }, new Date(`${year}-01-01`)] },
+                    { $lte: [{ $toDate: "$startDates" }, new Date(`${year}-12-31`)] }
+                  ]
+                }
+            }
+          },
+          {
+            $group: {
+              _id: { $month: { $toDate: "$startDates" } },
+              numTourStarts: { $sum: 1 },
+              tours: { $push: "$name" }
+            }
+          },
+          {
+            $addFields: { month: "$_id" }
+          },
+          {
+            $project: { _id: 0 }
+          },
+          {
+            $sort: { numTourStarts: -1 }
+          },
+          {
+            $limit: 12
+          }
+      ]);
+      res.status(200).json({
+         message: 'Get monthly plan successfully!',
+         total: plan.length,
+         data: plan,
+      });
+   } catch (error) {
+      logger.error(`Get Monthly plan error: ${error}`);
+      res.status(500).json({
+         status: 'Fail to get monthly plan',
+         message: error,
       });
       next(error);
    }
