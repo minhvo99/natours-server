@@ -2,10 +2,10 @@
    "name": "node-starter",
    "version": "0.0.0",
    "scripts": {
-      "dev": "nodemon --watch src --exec ts-node src/index.ts",
+      "dev": "nodemon --watch src --exec ts-node src/index.ts && npm run prettier",
       "build": "rm -rf dist/* && npx tsc",
       "start": "npm run build && nodemon dist/index.js",
-      "prettier": "prettier '{src,/**/*.ts}' --write --single-quote --trailing-comma all"
+      "prettier": "npx prettier --write 'src/**/*.ts'"
    },
    "dependencies": {
       "@types/cors": "^2.8.17",

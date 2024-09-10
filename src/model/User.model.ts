@@ -10,7 +10,7 @@ const userSchema = new Schema({
       required: [true, 'Please provice a valid email'],
       unique: true,
       lowercase: true,
-   }
+   },
 });
 const User = mongoose.model('User', userSchema);
 

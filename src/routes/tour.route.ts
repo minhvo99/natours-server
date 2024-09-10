@@ -1,13 +1,19 @@
 import express from 'express';
-import TourController from './../controllers/Tour.controller';
+import {
+   aliasTopTours,
+   createTour,
+   deleteTour,
+   getAllTour,
+   getTourbyId,
+   updateTour,
+} from '../controllers/Tour.controller';
 
 const tourRoute = express.Router();
-const tourController = new TourController();
-tourRoute.get('/top-5-cheap', tourController.aliasTopTours, tourController.getAllTour)
-tourRoute.get('/', tourController.getAllTour);
-tourRoute.get('/:id', tourController.getTourbyId);
-tourRoute.post('/', tourController.createTour);
-tourRoute.put('/:id', tourController.updateTour);
-tourRoute.delete('/:id', tourController.deleteTour);
+tourRoute.get('/top-5-cheap', aliasTopTours, getAllTour);
+tourRoute.get('/', getAllTour);
+tourRoute.get('/:id', getTourbyId);
+tourRoute.post('/', createTour);
+tourRoute.put('/:id', updateTour);
+tourRoute.delete('/:id', deleteTour);
 
 export default tourRoute;

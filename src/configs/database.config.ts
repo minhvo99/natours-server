@@ -7,7 +7,7 @@ dotenv.config();
 const { MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB, MONGODB_USER, CLUSTER } = process.env;
 
 const password = encodeURIComponent(`${MONGODB_PASSWORD}`);
-const uri = `mongodb+srv://${MONGODB_USER}:${password}@${MONGODB_HOST}/${MONGODB_DB}?retryWrites=true&w=majority&appName=${CLUSTER}`;  
+const uri = `mongodb+srv://${MONGODB_USER}:${password}@${MONGODB_HOST}/${MONGODB_DB}?retryWrites=true&w=majority&appName=${CLUSTER}`;
 
 const connect = async () => {
    try {

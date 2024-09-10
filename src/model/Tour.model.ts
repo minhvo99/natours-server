@@ -48,10 +48,10 @@ const tourSchemas = new Schema({
    },
    images: [String],
    createdAt: {
-    type: Date,
-    default: Date.now()
+      type: Date,
+      default: Date.now(),
    },
-   startDates: [String]
+   startDates: [String],
 });
 
 const Tour = mongoose.model('Tour', tourSchemas);
