@@ -20,8 +20,11 @@ Get Top 5 Cheap Tours 👉🏻 GET `/api/v1/tour/top-5-cheap`
 Get Monthly Plan 👉🏻 GET `/api/v1/tour/monthly-plan/:year`
 
 Add new Tour 👉🏻  POST `/api/v1/tour/`
+
 Form data example: 
-```{
+
+```
+{
     "name": "The Sea Explorer",
     "duration": 7,
     "maxGroupSize": 15,
@@ -47,7 +50,8 @@ Form data example:
 Update a tour  👉🏻  PUT `/api/v1/tour/:id`
 Example: update the name of the tour
 Form data: 
-```{
+```
+{
     "name": "The Sea Explorer",
   }
 ```
