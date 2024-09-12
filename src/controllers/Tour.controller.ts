@@ -5,8 +5,8 @@ import APIFeature from '../utils/apiFeature';
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
-   req.query.sort = '-ratingsAvarage,price';
-   req.query.fields = 'name,price,ratingsAvarage,summary,difficulty';
+   req.query.sort = '-ratingsAverage,price';
+   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
    next();
 };
 
@@ -120,7 +120,12 @@ export const deleteTour = async (req: Request, res: Response, next: NextFunction
             message: 'Invalid id',
          });
       }
-      await Tour.findByIdAndDelete(id);
+      const result = await Tour.findByIdAndDelete(id);
+      if (!result) {
+         return res.status(404).json({
+            message: 'Tour not found',
+         });
+      }
       res.status(200).json({
          messgage: `Delete tour id: ${id} successfully!`,
       });
@@ -138,14 +143,14 @@ export const getTourStast = async (req: Request, res: Response, next: NextFuncti
    try {
       const stast = await Tour.aggregate([
          {
-            $match: { ratingsAvarage: { $gte: 4.5 } },
+            $match: { ratingsAverage: { $gte: 4.5 } },
          },
          {
             $group: {
                _id: { $toUpper: '$difficulty' },
                numTours: { $sum: 1 },
                numRatings: { $sum: '$ratingsQuantity' },
-               avgRating: { $avg: '$ratingsAvarage' },
+               avgRating: { $avg: '$ratingsAverage' },
                avgPrice: { $avg: '$price' },
                minPrice: { $min: '$price' },
                maxPrice: { $max: '$price' },

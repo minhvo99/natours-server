@@ -30,7 +30,7 @@ Form data example:
     "maxGroupSize": 15,
     "difficulty": "medium",
     "ratingsQuantity": 6,
-    "ratingsAvarage": 4.5,
+    "ratingsAverage": 4.5,
     "price": 497,
     "summary": "Exploring the jaw-dropping US east coast by foot and by boat",
     "description": "Test",
@@ -57,3 +57,30 @@ Form data:
 ```
 
 Delete a tour  👉🏻  DELETE `/api/v1/tour/:id`
+
+```
+GET http://localhost:8080/api/v1/tour?duration[lte]=5&difficulty=difficult
+###
+GET http://localhost:8080/api/v1/tour?name=The Snow Adventurer
+###
+GET http://localhost:8080/api/v1/tour?sort=price,ratingsAverage
+###
+GET http://localhost:8080/api/v1/tour?fields=name,price
+
+###
+GET  http://localhost:8080/api/v1/tour?page=2&limit=4
+
+###
+GET  http://localhost:8080/api/v1/tour/top-5-cheap
+###
+GET http://localhost:8080/api/v1/tour/
+
+###
+GET http://localhost:8080/api/v1/tour/tour-stast
+###
+GET http://localhost:8080/api/v1/tour/monthly-plan/2021
+###
+DELETE http://localhost:8080/api/v1/tour/66e01edbb827da77d259c699
+###
+
+```
