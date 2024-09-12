@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
-import mongoose from 'mongoose';
 import APIFeature from '../utils/apiFeature';
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
-   req.query.sort = '-ratingsAvarage,price';
-   req.query.fields = 'name,price,ratingsAvarage,summary,difficulty';
+   req.query.sort = '-ratingsAverage,price';
+   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
    next();
 };
 
@@ -38,7 +37,7 @@ export const getAllTour = async (req: Request, res: Response, next: NextFunction
 export const getTourbyId = async (req: Request, res: Response, next: NextFunction) => {
    try {
       const { id } = req.params;
-      if (!mongoose.Types.ObjectId.isValid(id)) {
+      if (!id) {
          return res.status(400).json({
             message: 'Invalid id',
          });
@@ -85,7 +84,7 @@ export const updateTour = async (req: Request, res: Response, next: NextFunction
             message: 'Tour to update can not be empty!',
          });
       }
-      if (!mongoose.Types.ObjectId.isValid(id)) {
+      if (!id) {
          return res.status(400).json({
             message: 'Invalid id',
          });
@@ -116,12 +115,17 @@ export const updateTour = async (req: Request, res: Response, next: NextFunction
 export const deleteTour = async (req: Request, res: Response, next: NextFunction) => {
    try {
       const { id } = req.params;
-      if (!mongoose.Types.ObjectId.isValid(id)) {
+      if (!id) {
          return res.status(400).json({
             message: 'Invalid id',
          });
       }
-      await Tour.findByIdAndDelete(id);
+      const result = await Tour.findByIdAndDelete(id);
+      if (!result) {
+         return res.status(404).json({
+            message: 'Tour not found',
+         });
+      }
       res.status(200).json({
          messgage: `Delete tour id: ${id} successfully!`,
       });
@@ -139,14 +143,14 @@ export const getTourStast = async (req: Request, res: Response, next: NextFuncti
    try {
       const stast = await Tour.aggregate([
          {
-            $match: { ratingsAvarage: { $gte: 4.5 } },
+            $match: { ratingsAverage: { $gte: 4.5 } },
          },
          {
             $group: {
                _id: { $toUpper: '$difficulty' },
                numTours: { $sum: 1 },
                numRatings: { $sum: '$ratingsQuantity' },
-               avgRating: { $avg: '$ratingsAvarage' },
+               avgRating: { $avg: '$ratingsAverage' },
                avgPrice: { $avg: '$price' },
                minPrice: { $min: '$price' },
                maxPrice: { $max: '$price' },
@@ -175,37 +179,37 @@ export const getMonthlyPlan = async (req: Request, res: Response, next: NextFunc
       const year = (req.params.year as any) * 1;
       const plan = await Tour.aggregate([
          {
-            $unwind: "$startDates"
-          },
-          {
+            $unwind: '$startDates',
+         },
+         {
             $match: {
                $expr: {
                   $and: [
-                    { $gte: [{ $toDate: "$startDates" }, new Date(`${year}-01-01`)] },
-                    { $lte: [{ $toDate: "$startDates" }, new Date(`${year}-12-31`)] }
-                  ]
-                }
-            }
-          },
-          {
+                     { $gte: [{ $toDate: '$startDates' }, new Date(`${year}-01-01`)] },
+                     { $lte: [{ $toDate: '$startDates' }, new Date(`${year}-12-31`)] },
+                  ],
+               },
+            },
+         },
+         {
             $group: {
-              _id: { $month: { $toDate: "$startDates" } },
-              numTourStarts: { $sum: 1 },
-              tours: { $push: "$name" }
-            }
-          },
-          {
-            $addFields: { month: "$_id" }
-          },
-          {
-            $project: { _id: 0 }
-          },
-          {
-            $sort: { numTourStarts: -1 }
-          },
-          {
-            $limit: 12
-          }
+               _id: { $month: { $toDate: '$startDates' } },
+               numTourStarts: { $sum: 1 },
+               tours: { $push: '$name' },
+            },
+         },
+         {
+            $addFields: { month: '$_id' },
+         },
+         {
+            $project: { _id: 0 },
+         },
+         {
+            $sort: { numTourStarts: -1 },
+         },
+         {
+            $limit: 12,
+         },
       ]);
       res.status(200).json({
          message: 'Get monthly plan successfully!',
