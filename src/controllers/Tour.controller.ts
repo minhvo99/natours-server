@@ -72,6 +72,10 @@ export const createTour = async (req: Request, res: Response, next: NextFunction
       });
    } catch (error: any) {
       logger.error(`Create tour error: ${error}`);
+      res.status(500).json({
+         message: 'Fail to create tour',
+         error: error,
+      });
       next(error);
    }
 };
