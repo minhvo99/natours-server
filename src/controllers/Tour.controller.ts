@@ -26,10 +26,6 @@ export const getAllTour = async (req: Request, res: Response, next: NextFunction
       });
    } catch (error) {
       logger.error(`Get all tours error: ${error}`);
-      res.status(500).json({
-         status: 'Fail to get tours',
-         message: error,
-      });
       next(error);
    }
 };
@@ -55,30 +51,36 @@ export const getTourbyId = async (req: Request, res: Response, next: NextFunctio
       });
    } catch (error) {
       logger.error(`Get tour by id error: ${error}`);
-      res.status(500).json({
-         status: 'error',
-         message: `Fail to get tour: ${error}`,
-      });
       next(error);
    }
 };
 
-export const createTour = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-      const newTour = await Tour.create(req.body);
+const catchAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => {
+   return (req: Request, res: Response, next: NextFunction) => {
+      fn(req, res, next).catch(next)
+   }
+}
+
+export const createTour = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+   const newTour = await Tour.create(req.body);
       res.status(201).json({
          message: 'Create a new tour successfully!',
          data: newTour,
       });
-   } catch (error: any) {
-      logger.error(`Create tour error: ${error}`);
-      res.status(500).json({
-         message: 'Fail to create tour',
-         error: error,
-      });
-      next(error);
-   }
-};
+});
+// export const createTour = async (req: Request, res: Response, next: NextFunction) => {
+//    try {
+//    const newTour = await Tour.create(req.body);
+//       res.status(201).json({
+//          message: 'Create a new tour successfully!',
+//          data: newTour,
+//       });
+      
+//    } catch (error: any) {
+//       logger.error(`Create tour error: ${error}`);
+//       next(error);
+//    }
+// };
 
 export const updateTour = async (req: Request, res: Response, next: NextFunction) => {
    try {
@@ -108,10 +110,6 @@ export const updateTour = async (req: Request, res: Response, next: NextFunction
       });
    } catch (error) {
       logger.error(`Update tour error: ${error}`);
-      res.status(500).json({
-         status: 'error',
-         message: `Fail to update tour: ${error}`,
-      });
       next(error);
    }
 };
@@ -135,10 +133,6 @@ export const deleteTour = async (req: Request, res: Response, next: NextFunction
       });
    } catch (error) {
       logger.error(`Delete tour error: ${error}`);
-      res.status(500).json({
-         status: 'error',
-         message: `Fail to delete tour: ${error}`,
-      });
       next(error);
    }
 };
@@ -170,10 +164,6 @@ export const getTourStast = async (req: Request, res: Response, next: NextFuncti
       });
    } catch (error) {
       logger.error(`Get tour stats error: ${error}`);
-      res.status(500).json({
-         status: 'Fail to get tour stats',
-         message: error,
-      });
       next(error);
    }
 };
@@ -222,10 +212,6 @@ export const getMonthlyPlan = async (req: Request, res: Response, next: NextFunc
       });
    } catch (error) {
       logger.error(`Get Monthly plan error: ${error}`);
-      res.status(500).json({
-         status: 'Fail to get monthly plan',
-         message: error,
-      });
       next(error);
    }
 };

@@ -2,6 +2,7 @@ import { Query } from 'mongoose';
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
+import validator from 'validator';
 
 const tourSchemas = new Schema(
    {
@@ -11,7 +12,7 @@ const tourSchemas = new Schema(
          unique: true,
          trim: true,
          maxlength: [40, 'A tour name must have less or equal than 40 characters'],
-         minlength: [10, 'A tour name must have more or equal than 10 characters']
+         minlength: [10, 'A tour name must have more or equal than 10 characters'],
       },
       duration: {
          type: Number,
@@ -46,7 +47,12 @@ const tourSchemas = new Schema(
       },
       priceDiscount: {
          type: Number,
-         default: 0,
+         validate: {
+            validator: function (this: Document, val: number) {
+               return val < this.get('price');
+            },
+            message: 'Discount price should be below the regular price',
+         },
       },
       summary: {
          type: String,
@@ -71,7 +77,7 @@ const tourSchemas = new Schema(
       secretTour: {
          type: Boolean,
          default: false,
-      }
+      },
    },
    {
       toJSON: { virtuals: true },
@@ -92,13 +98,12 @@ tourSchemas.pre('save', function (next) {
    next();
 });
 
-tourSchemas.pre('save', function (next) {
-   if (this.priceDiscount >= this.price) {
-      throw new Error('Discount price should be below the regular price');
-   }
-   next();
-});
-
+// tourSchemas.pre('save', function (next) {
+//    if (this.priceDiscount != null && this.price != null && this.priceDiscount >= this.price) {
+//       throw new Error('Discount price should be below the regular price');
+//    }
+//    next();
+// });
 
 //QUERY MIDDLEWARE
 tourSchemas.pre(/^find/, function (this: Query<any, any>, next) {
