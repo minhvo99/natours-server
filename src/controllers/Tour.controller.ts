@@ -55,32 +55,18 @@ export const getTourbyId = async (req: Request, res: Response, next: NextFunctio
    }
 };
 
-const catchAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => {
-   return (req: Request, res: Response, next: NextFunction) => {
-      fn(req, res, next).catch(next)
-   }
-}
-
-export const createTour = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-   const newTour = await Tour.create(req.body);
+export const createTour = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const newTour = await Tour.create(req.body);
       res.status(201).json({
          message: 'Create a new tour successfully!',
          data: newTour,
       });
-});
-// export const createTour = async (req: Request, res: Response, next: NextFunction) => {
-//    try {
-//    const newTour = await Tour.create(req.body);
-//       res.status(201).json({
-//          message: 'Create a new tour successfully!',
-//          data: newTour,
-//       });
-      
-//    } catch (error: any) {
-//       logger.error(`Create tour error: ${error}`);
-//       next(error);
-//    }
-// };
+   } catch (error: any) {
+      logger.error(`Create tour error: ${error}`);
+      next(error);
+   }
+};
 
 export const updateTour = async (req: Request, res: Response, next: NextFunction) => {
    try {
