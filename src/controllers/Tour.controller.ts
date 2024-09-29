@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
 import APIFeature from '../utils/apiFeature';
+import AppError from '../utils/appError';
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
@@ -32,18 +33,9 @@ export const getAllTour = async (req: Request, res: Response, next: NextFunction
 
 export const getTourbyId = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const { id } = req.params;
-      if (!id) {
-         return res.status(400).json({
-            message: 'Invalid id',
-         });
-      }
-      const tour = await Tour.findById(id);
+      const tour = await Tour.findById(req.params.id);
       if (!tour) {
-         return res.status(404).json({
-            status: 'fail',
-            message: 'Tour not found',
-         });
+         return next(new AppError('No tour found with that ID', 404));
       }
       res.status(200).json({
          message: 'Get tour by id successfully!',
@@ -70,25 +62,15 @@ export const createTour = async (req: Request, res: Response, next: NextFunction
 
 export const updateTour = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const { id } = req.params;
       if (Object.keys(req.body).length === 0) {
-         return res.status(400).json({
-            message: 'Tour to update can not be empty!',
-         });
-      }
-      if (!id) {
-         return res.status(400).json({
-            message: 'Invalid id',
-         });
+         return next(new AppError('Tour to update can not be empty!', 400));
       }
       const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
          new: true,
          runValidators: true,
       });
       if (!tour) {
-         return res.status(404).json({
-            message: 'fail to update tour',
-         });
+         return next(new AppError('Tour not found', 404));
       }
       res.status(200).json({
          message: 'Update tour successfully!',
@@ -103,16 +85,9 @@ export const updateTour = async (req: Request, res: Response, next: NextFunction
 export const deleteTour = async (req: Request, res: Response, next: NextFunction) => {
    try {
       const { id } = req.params;
-      if (!id) {
-         return res.status(400).json({
-            message: 'Invalid id',
-         });
-      }
       const result = await Tour.findByIdAndDelete(id);
       if (!result) {
-         return res.status(404).json({
-            message: 'Tour not found',
-         });
+         return next(new AppError('No document found with that ID', 404));
       }
       res.status(200).json({
          messgage: `Delete tour id: ${id} successfully!`,
