@@ -2,9 +2,12 @@ import { Query } from 'mongoose';
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
-import validator from 'validator';
+import { ITour } from '../constans/Tour';
 
-const tourSchemas = new Schema(
+
+
+
+const tourSchemas = new Schema<ITour>(
    {
       name: {
          type: String,
@@ -116,6 +119,6 @@ tourSchemas.pre('aggregate', function (next) {
    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
    next();
 });
-const Tour = mongoose.model('Tour', tourSchemas);
+const Tour = mongoose.model<ITour>('Tour', tourSchemas);
 
 export default Tour;
