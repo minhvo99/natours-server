@@ -4,9 +4,6 @@ import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
 import { ITour } from '../constans/Tour';
 
-
-
-
 const tourSchemas = new Schema<ITour>(
    {
       name: {

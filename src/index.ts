@@ -32,19 +32,19 @@ const server = app.listen(port, () => {
 });
 
 process.on('unhandledRejection', (err: any) => {
-   console.log('UNHANDLED Rejection! 💣 Shutting down...')
+   console.log('UNHANDLED Rejection! 💣 Shutting down...');
    console.log(err.name, err.message);
    server.close(() => {
       process.exit(1);
-   })
-})
+   });
+});
 
 process.on('uncaughtException', (err: any) => {
-   console.log('UNCAUGHT Exception! 💣 Shutting down...')
+   console.log('UNCAUGHT Exception! 💣 Shutting down...');
    console.log(err.name, err.message);
    server.close(() => {
       process.exit(1);
-   })
-})
+   });
+});
 
 export default app;
