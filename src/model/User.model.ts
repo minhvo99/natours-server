@@ -3,39 +3,46 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import { IUser } from '../constans/User';
 
-const userSchema = new Schema<IUser>({
-   name: {
-      type: String,
-      required: [true, 'Please tell us your name'],
-   },
-   email: {
-      type: String,
-      required: [true, 'Please provide your email'],
-      unique: true,
-      lowercase: true,
-      validate: [validator.isEmail, 'Please provide a valid email'],
-   },
-   photo: String,
-   password: {
-      type: String,
-      required: [true, 'Please provide a password'],
-      minlength: 8,
-      select: false,
-   },
-   passWordConfirm: {
-      type: String,
-      required: [true, 'Please confirm your password'],
-      validate: {
-         //this only works on CREATE and SAVE !!!
-         validator: function (this: any, value: string) {
-            return value === this.password;
-         },
-         message: 'Passwords are not the same',
+const userSchema = new Schema<IUser>(
+   {
+      name: {
+         type: String,
+         required: [true, 'Please tell us your name'],
       },
+      email: {
+         type: String,
+         required: [true, 'Please provide your email'],
+         unique: true,
+         lowercase: true,
+         validate: [validator.isEmail, 'Please provide a valid email'],
+      },
+      photo: String,
+      password: {
+         type: String,
+         required: [true, 'Please provide a password'],
+         minlength: 8,
+         select: false,
+      },
+      passWordConfirm: {
+         type: String,
+         required: [true, 'Please confirm your password'],
+         validate: {
+            //this only works on CREATE and SAVE !!!
+            validator: function (this: any, value: string) {
+               return value === this.password;
+            },
+            message: 'Passwords are not the same',
+         },
+      },
+      passWordChangeAt: Date,
+      // role: String,
+      // active: Boolean,
    },
-   // role: String,
-   // active: Boolean,
-});
+   {
+      toJSON: { virtuals: true },
+      toObject: { virtuals: true },
+   },
+);
 
 // Hash the password before saving to the database
 userSchema.pre('save', async function (next) {
@@ -50,6 +57,14 @@ userSchema.methods.correctPassword = async function (
    userPassword: string,
 ) {
    return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changePasswordAfter = function (JTWTimestamp: number) {
+   if (this.passWordChangeAt) {
+      const changeTimestamp = this.passWordChangeAt.getTime() / 1000;
+     return JTWTimestamp < changeTimestamp;
+   }
+   return false;
 };
 
 const User = mongoose.model<IUser>('User', userSchema);

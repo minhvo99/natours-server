@@ -5,5 +5,7 @@ export interface IUser {
    photo?: string;
    password: string;
    passWordConfirm?: string;
+   passWordChangeAt?: Date;
    correctPassword(candidatePassword: string, userPassword: string): Promise<boolean>;
+   changePasswordAfter (JWTTimestamp: number): Promise<boolean>;
 }

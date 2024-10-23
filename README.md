@@ -7,6 +7,10 @@
 ## How To Use 
 update later...
 
+## Nodejs version
+
+node v18.20.4 (npm v10.7.0)
+
 ## API Usage
 
 # Tour
