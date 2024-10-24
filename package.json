@@ -4,7 +4,7 @@
    "scripts": {
       "dev": "nodemon --watch src --exec ts-node src/index.ts",
       "build": "rm -rf dist/* && npx tsc && echo 'Build complete'",
-      "start": "nodemon dist/index.js",
+      "start": "node dist/index.js",
       "start:prod": "NODE_ENV=production npm run build && nodemon dist/index.js",
       "prettier": "npx prettier --write 'src/**/*.ts'",
       "debug": "ndb index.ts"
