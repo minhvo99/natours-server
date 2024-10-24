@@ -3,7 +3,7 @@
    "version": "0.0.0",
    "scripts": {
       "dev": "nodemon --watch src --exec ts-node src/index.ts",
-      "build": "rm -rf dist/* && npx tsc",
+      "build": "rm -rf dist/* && npx tsc && echo 'Build complete'",
       "start": "npm run build && nodemon dist/index.js",
       "start:prod": "NODE_ENV=production npm run build && nodemon dist/index.js",
       "prettier": "npx prettier --write 'src/**/*.ts'",
@@ -43,6 +43,7 @@
       "@types/node": "^20.14.10",
       "@types/validator": "^13.12.2",
       "ndb": "^0.2.4",
-      "typescript": "^5.5.3"
+      "typescript": "^5.5.3",
+      "vercel": "^37.12.1"
    }
 }
