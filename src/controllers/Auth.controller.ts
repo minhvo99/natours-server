@@ -20,7 +20,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
          email: req.body.email,
          password: req.body.password,
          passWordConfirm: req.body.passWordConfirm,
-         passWordChangeAt: req.body.passWordChangeAt || null
+         passWordChangeAt: req.body.passWordChangeAt || null,
       });
       const token = signToken(newUser.name, newUser._id);
       res.status(201).json({

@@ -7,5 +7,5 @@ export interface IUser {
    passWordConfirm?: string;
    passWordChangeAt?: Date;
    correctPassword(candidatePassword: string, userPassword: string): Promise<boolean>;
-   changePasswordAfter (JWTTimestamp: number): Promise<boolean>;
+   changePasswordAfter(JWTTimestamp: number): Promise<boolean>;
 }

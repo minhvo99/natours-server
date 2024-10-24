@@ -62,7 +62,7 @@ userSchema.methods.correctPassword = async function (
 userSchema.methods.changePasswordAfter = function (JTWTimestamp: number) {
    if (this.passWordChangeAt) {
       const changeTimestamp = this.passWordChangeAt.getTime() / 1000;
-     return JTWTimestamp < changeTimestamp;
+      return JTWTimestamp < changeTimestamp;
    }
    return false;
 };
