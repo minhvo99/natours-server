@@ -17,8 +17,8 @@ tourRoute.get('/tour-stast', getTourStast);
 tourRoute.get('/monthly-plan/:year', getMonthlyPlan);
 tourRoute.get('/', authorization, getAllTour);
 tourRoute.get('/:id', getTourbyId);
-tourRoute.post('/', createTour);
-tourRoute.put('/:id', updateTour);
+tourRoute.post('/', authorization, restrictTo('admin', 'lead-guide'), createTour);
+tourRoute.put('/:id', authorization, restrictTo('admin', 'lead-guide'), updateTour);
 tourRoute.delete('/:id', authorization, restrictTo('admin', 'lead-guide'), deleteTour);
 
 export default tourRoute;

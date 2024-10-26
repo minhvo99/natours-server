@@ -3,14 +3,25 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
 import dotenv from 'dotenv';
-import { IUser } from '../constans/User';
+import { AuthRequestBody, IUser } from '../constans/User';
 import { signToken } from '../utils/auth';
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
 import { sendEmail } from '../utils/email';
+import crypto from 'crypto';
+
 dotenv.config();
 const SERECT = process.env.JWT_SECRET_KEY as Secret;
 
-export const signUp = async (req: Request, res: Response, next: NextFunction) => {
+const createSendToken = (user: IUser, statusCode: number, res: Response) => {
+   const token = signToken(user.name, user._id);
+   res.status(statusCode).json({
+      message: 'Success!',
+      token: token,
+      data: user,
+   });
+};
+
+export const signUp = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
    try {
       // let password = req.body.password;
       // const hashedPassword = await bcrypt.hash(password, 12);
@@ -23,19 +34,14 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
          passWordConfirm: req.body.passWordConfirm,
          passWordChangeAt: req.body.passWordChangeAt || null,
       });
-      const token = signToken(newUser.name, newUser._id);
-      res.status(201).json({
-         message: 'Create a new user successfully!',
-         token: token,
-         data: newUser,
-      });
+      createSendToken(newUser, 201, res);
    } catch (error) {
       logger.error(`Create user error: ${error}`);
       next(error);
    }
 };
 
-export const logIn = async (req: Request, res: Response, next: NextFunction) => {
+export const logIn = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
    try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -46,18 +52,14 @@ export const logIn = async (req: Request, res: Response, next: NextFunction) => 
       if (!user || !(await user.correctPassword(password, user.password))) {
          return next(new AppError('Incorrect email or password', 401));
       }
-      const token = signToken(user.name, user._id);
-      res.status(200).json({
-         status: 'Login successfuly',
-         token: token,
-      });
+      createSendToken(user, 200, res);
    } catch (error) {
       logger.error(`Login error: ${error}`);
       next(error);
    }
 };
 
-export const authorization = async (req: Request, res: Response, next: NextFunction) => {
+export const authorization = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
    try {
       //1) getting token and check of if's there
       let token = '';
@@ -91,7 +93,7 @@ export const authorization = async (req: Request, res: Response, next: NextFunct
 };
 
 export const restrictTo = (...roles: any[]) => {
-   return (req: Request, res: Response, next: NextFunction) => {
+   return (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
       if (!roles.includes((req as any).user.role)) {
          return next(new AppError('You do not have permission.', 403));
       }
@@ -99,7 +101,7 @@ export const restrictTo = (...roles: any[]) => {
    };
 };
 
-export const forgotPassWord = async (req: Request, res: Response, next: NextFunction) => {
+export const forgotPassWord = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
    //1) Get user based on POSTed email
 
    const user = await User.findOne({ email: req.body.email });
@@ -138,4 +140,57 @@ export const forgotPassWord = async (req: Request, res: Response, next: NextFunc
    }
 };
 
-export const resetPassWord = (req: Request, res: Response, next: NextFunction) => {};
+export const resetPassWord = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      //1) Get user based on the token
+      const hashedToken = crypto.createHash('sha256').update(req.params?.token).digest('hex');
+
+      const user = await User.findOne({
+         passWordResetToken: hashedToken,
+         passWordResetExpires: { $gt: Date.now() },
+      });
+
+      //2) IF token has not expired, and there is user, set the new password
+      if (!user) {
+         return next(new AppError('Token is invalid or has expired!', 400));
+      }
+
+      user.password = req.body.password;
+      user.passWordConfirm = req.body.passWordConfirm;
+      user.passWordResetToken = undefined;
+      user.passWordResetExpires = undefined;
+
+      await user.save();
+
+      //3) Update changePasswordAt property for the user
+
+      //4) Log the user in, send JWT
+      createSendToken(user, 200, res);
+   } catch (error) {
+      logger.error(`Fail to reset password: ${error}`);
+      next(error);
+   }
+};
+
+export const updatePassword = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      //1) Get user from collection
+      const user = (await User.findById((req as any).user.id).select('+password')) as IUser;
+      //2) Check if POSTed current password is correct
+      if (!(await user.correctPassword(req.body.passWordCurrent, user.password))) {
+         return next(new AppError('Your current password is wrong', 401));
+      }
+      //3) If so, update password
+
+      user.password = req.body.password;
+      user.passWordConfirm = req.body.passWordConfirm;
+
+      await user.save();
+
+      //4) Log the user in, send JWT
+      createSendToken(user, 200, res);
+   } catch (error) {
+      logger.error(`Fail to reset password: ${error}`);
+      next(error);
+   }
+};

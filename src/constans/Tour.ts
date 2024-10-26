@@ -1,4 +1,5 @@
-export interface ITour {
+import { Document } from 'mongoose';
+export interface ITour extends Document {
    name: string;
    duration: number;
    slug?: string;
