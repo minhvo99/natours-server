@@ -9,7 +9,7 @@ import {
    getTourStast,
    updateTour,
 } from '../controllers/Tour.controller';
-import { authorization } from '../controllers/Auth.controller';
+import { authorization, restrictTo } from '../controllers/Auth.controller';
 
 const tourRoute = express.Router();
 tourRoute.get('/top-5-cheap', aliasTopTours, getAllTour);
@@ -19,6 +19,6 @@ tourRoute.get('/', authorization, getAllTour);
 tourRoute.get('/:id', getTourbyId);
 tourRoute.post('/', createTour);
 tourRoute.put('/:id', updateTour);
-tourRoute.delete('/:id', deleteTour);
+tourRoute.delete('/:id', authorization, restrictTo('admin', 'lead-guide'), deleteTour);
 
 export default tourRoute;
