@@ -6,6 +6,10 @@ export interface IUser {
    password: string;
    passWordConfirm?: string;
    passWordChangeAt?: Date;
+   role: string;
+   passWordResetToken?: string;
+   passWordResetExpires?: Date;
    correctPassword(candidatePassword: string, userPassword: string): Promise<boolean>;
-   changePasswordAfter(JWTTimestamp: number): Promise<boolean>;
+   changePasswordAfter(JWTTimestamp: number): boolean;
+   createPasswordResetToken(): string;
 }

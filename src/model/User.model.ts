@@ -1,7 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 import validator from 'validator';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { IUser } from '../constans/User';
+import crypto from 'crypto';
 
 const userSchema = new Schema<IUser>(
    {
@@ -35,7 +36,13 @@ const userSchema = new Schema<IUser>(
          },
       },
       passWordChangeAt: Date,
-      // role: String,
+      role: {
+         type: String,
+         enum: ['user', 'guide', 'lead-guide', 'admin'],
+         default: 'user',
+      },
+      passWordResetToken: String,
+      passWordResetExpires: Date,
       // active: Boolean,
    },
    {
@@ -65,6 +72,17 @@ userSchema.methods.changePasswordAfter = function (JTWTimestamp: number) {
       return JTWTimestamp < changeTimestamp;
    }
    return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+   const resetToken = crypto.randomBytes(32).toString('hex');
+
+   this.passWordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+   this.passWordResetExpires = Date.now() + 10 * 60 * 1000; //10 minutes
+   console.log({ resetToken }, this.passWordResetToken);
+
+   return resetToken;
 };
 
 const User = mongoose.model<IUser>('User', userSchema);

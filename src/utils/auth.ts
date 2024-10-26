@@ -1,6 +1,6 @@
 import jwt, { Secret } from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 dotenv.config();
 const SERECT = process.env.JWT_SECRET_KEY as Secret;
 const expiresIn = process.env.JWT_EXPIRE_IN;
