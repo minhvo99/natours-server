@@ -4,7 +4,7 @@ import { authorization, restrictTo } from '../controllers/Auth.controller';
 const userRoute = express.Router();
 
 userRoute.get('/', authorization, getAllUsers);
-userRoute.delete('/:id', authorization, restrictTo('admin'), deleteUser);
-userRoute.patch('/update-my-profile', authorization, updateMyProfile)
+userRoute.delete('/delete-user', authorization, restrictTo('admin'), deleteUser);
+userRoute.patch('/update-profile', authorization, updateMyProfile)
 
 export default userRoute;

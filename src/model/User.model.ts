@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Query, Schema } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import { IUser } from '../constans/User';
@@ -38,12 +38,16 @@ const userSchema = new Schema<IUser>(
       passWordChangeAt: Date,
       role: {
          type: String,
-         enum: ['user', 'guide', 'lead-guide', 'admin'],
-         default: 'user',
+         enum: ['guest', 'guide', 'lead-guide', 'admin'],
+         default: 'guest',
       },
       passWordResetToken: String,
       passWordResetExpires: Date,
-      // active: Boolean,
+      active: {
+         type: Boolean,
+         default: true,
+         select: false
+      }
    },
    {
       toJSON: { virtuals: true },
@@ -59,6 +63,11 @@ userSchema.pre('save', async function (next) {
    this.passWordConfirm = undefined;
    next();
 });
+
+// userSchema.pre(/^find/, function (this: Query<any, any>, next) {
+//    this.find({ active: { $ne: false } });
+//    next();
+// });
 
 userSchema.pre('save', function (next) {
    if (!this.isModified('password') || this.isNew) return next();

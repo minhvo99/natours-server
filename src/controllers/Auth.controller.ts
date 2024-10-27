@@ -13,15 +13,18 @@ dotenv.config();
 const SERECT = process.env.JWT_SECRET_KEY as Secret;
 
 const createSendToken = (user: IUser, statusCode: number, res: Response) => {
-   const token = signToken(user.name, user._id);
+   const token = signToken(user);
    res.status(statusCode).json({
       message: 'Success!',
       token: token,
-      data: user,
    });
 };
 
-export const signUp = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
+export const signUp = async (
+   req: Request<{}, {}, AuthRequestBody>,
+   res: Response,
+   next: NextFunction,
+) => {
    try {
       // let password = req.body.password;
       // const hashedPassword = await bcrypt.hash(password, 12);
@@ -41,13 +44,21 @@ export const signUp = async (req: Request<{}, {}, AuthRequestBody>, res: Respons
    }
 };
 
-export const logIn = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
+export const logIn = async (
+   req: Request<{}, {}, AuthRequestBody>,
+   res: Response,
+   next: NextFunction,
+) => {
    try {
       const { email, password } = req.body;
       if (!email || !password) {
          return next(new AppError(`Please provice email and password!`, 400));
       }
-      const user = (await User.findOne({ email }).select('+password')) as IUser;
+      const user = (await User.findOne({ email }).select('+password +active')) as IUser;
+
+      if (!user || !user.active) {
+         return next(new AppError('User account is inactive or does not exist.', 404));
+      }
 
       if (!user || !(await user.correctPassword(password, user.password))) {
          return next(new AppError('Incorrect email or password', 401));
@@ -59,7 +70,11 @@ export const logIn = async (req: Request<{}, {}, AuthRequestBody>, res: Response
    }
 };
 
-export const authorization = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
+export const authorization = async (
+   req: Request<{}, {}, AuthRequestBody>,
+   res: Response,
+   next: NextFunction,
+) => {
    try {
       //1) getting token and check of if's there
       let token = '';
@@ -73,9 +88,15 @@ export const authorization = async (req: Request<{}, {}, AuthRequestBody>, res: 
       const decoded: string | JwtPayload = jwt.verify(token, SERECT);
 
       // 3) Check if user still exists
-      const currentUser = await User.findById((decoded as JwtPayload).id);
+      const currentUser = await User.findById((decoded as JwtPayload).id).select('+active');
       if (!currentUser) {
          return next(new AppError('The user belonging to this token does no longer exits', 401));
+      }
+
+      if (!currentUser.active) {
+         return next(
+            new AppError('Your account has been deactivated. Please contact support.', 403),
+         );
       }
 
       // 4) Check if user changed password after the token was issued
@@ -101,7 +122,11 @@ export const restrictTo = (...roles: any[]) => {
    };
 };
 
-export const forgotPassWord = async (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
+export const forgotPassWord = async (
+   req: Request<{}, {}, AuthRequestBody>,
+   res: Response,
+   next: NextFunction,
+) => {
    //1) Get user based on POSTed email
 
    const user = await User.findOne({ email: req.body.email });

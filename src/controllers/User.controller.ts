@@ -15,7 +15,7 @@ const filterObj = (obj: { [key: string]: any }, ...allowUpdated: string[]) => {
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const users = await User.find();
+      const users = await User.find({ active: { $ne: false } });
       res.status(200).json({
          message: 'Get all users successfully!',
          data: users,
@@ -55,13 +55,14 @@ export const updateMyProfile = async (req: Request, res: Response, next: NextFun
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const result = await User.findByIdAndDelete(req.params.id);
+      const result = await User.findByIdAndUpdate((req as any).user.id, { active: false});
       if (!result) {
-         return next(new AppError(`User with id ${req.params.id} does not exist`, 404));
+         return next(new AppError(`User with id ${(req as any).user.id} does not exist`, 404));
       }
 
       res.status(204).json({
-         message: `User with id ${req.params.id} deleted successfully!`,
+         message: `User with id ${(req as any).user.id} deleted successfully!`,
+         data: null
       });
    } catch (error) {
       logger.error(`Fail to deleteUSer: ${error}`);
