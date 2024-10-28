@@ -55,14 +55,14 @@ export const updateMyProfile = async (req: Request, res: Response, next: NextFun
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const result = await User.findByIdAndUpdate((req as any).user.id, { active: false});
+      const result = await User.findByIdAndUpdate((req as any).user.id, { active: false });
       if (!result) {
          return next(new AppError(`User with id ${(req as any).user.id} does not exist`, 404));
       }
 
       res.status(204).json({
          message: `User with id ${(req as any).user.id} deleted successfully!`,
-         data: null
+         data: null,
       });
    } catch (error) {
       logger.error(`Fail to deleteUSer: ${error}`);

@@ -46,8 +46,8 @@ const userSchema = new Schema<IUser>(
       active: {
          type: Boolean,
          default: true,
-         select: false
-      }
+         select: false,
+      },
    },
    {
       toJSON: { virtuals: true },

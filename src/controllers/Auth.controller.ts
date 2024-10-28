@@ -1,5 +1,5 @@
 import User from '../model/User.model';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, CookieOptions } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
 import dotenv from 'dotenv';
@@ -14,9 +14,20 @@ const SERECT = process.env.JWT_SECRET_KEY as Secret;
 
 const createSendToken = (user: IUser, statusCode: number, res: Response) => {
    const token = signToken(user);
+   const cookieOption: CookieOptions = {
+      expires: new Date(
+         Date.now() + Number(process.env.JWT_COOKIE_EXPIRE_IN) * 24 * 60 * 60 * 1000,
+      ), //90days
+      httpOnly: true,
+   };
+
+   if (process.env.NODE_ENV === 'production') cookieOption.secure = true;
+
+   res.cookie('jwt', token, cookieOption);
    res.status(statusCode).json({
       message: 'Success!',
       token: token,
+      user,
    });
 };
 
@@ -56,12 +67,12 @@ export const logIn = async (
       }
       const user = (await User.findOne({ email }).select('+password +active')) as IUser;
 
-      if (!user || !user.active) {
-         return next(new AppError('User account is inactive or does not exist.', 404));
-      }
-
       if (!user || !(await user.correctPassword(password, user.password))) {
          return next(new AppError('Incorrect email or password', 401));
+      }
+
+      if (!user || !user.active) {
+         return next(new AppError('User account is inactive or does not exist.', 404));
       }
       createSendToken(user, 200, res);
    } catch (error) {

@@ -3,8 +3,8 @@ import { getAllUsers, deleteUser, updateMyProfile } from '../controllers/User.co
 import { authorization, restrictTo } from '../controllers/Auth.controller';
 const userRoute = express.Router();
 
-userRoute.get('/', authorization, getAllUsers);
+userRoute.get('/', authorization, restrictTo('admin'), getAllUsers);
 userRoute.delete('/delete-user', authorization, restrictTo('admin'), deleteUser);
-userRoute.patch('/update-profile', authorization, updateMyProfile)
+userRoute.patch('/update-profile', authorization, updateMyProfile);
 
 export default userRoute;

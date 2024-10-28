@@ -9,7 +9,7 @@ export interface IUser extends Document {
    role: string;
    passWordResetToken?: string;
    passWordResetExpires?: Date;
-   active?: boolean,
+   active?: boolean;
    correctPassword(candidatePassword: string, userPassword: string): Promise<boolean>;
    changePasswordAfter(JWTTimestamp: number): boolean;
    createPasswordResetToken(): string;

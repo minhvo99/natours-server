@@ -1,5 +1,12 @@
 import express from 'express';
-import { authorization, forgotPassWord, logIn, resetPassWord, signUp, updatePassword } from '../controllers/Auth.controller';
+import {
+   authorization,
+   forgotPassWord,
+   logIn,
+   resetPassWord,
+   signUp,
+   updatePassword,
+} from '../controllers/Auth.controller';
 const authRoute = express.Router();
 
 authRoute.post('/sign-up', signUp);
