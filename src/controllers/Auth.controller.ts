@@ -12,22 +12,25 @@ import crypto from 'crypto';
 dotenv.config();
 const SERECT = process.env.JWT_SECRET_KEY as Secret;
 
-const createSendToken = (user: IUser, statusCode: number, res: Response) => {
+const createSendToken = (user: any, statusCode: number, res: Response) => {
    const token = signToken(user);
    const cookieOption: CookieOptions = {
       expires: new Date(
-         Date.now() + Number(process.env.JWT_COOKIE_EXPIRE_IN) * 24 * 60 * 60 * 1000,
-      ), //90days
+         Date.now() + Number(process.env.JWT_COOKIE_EXPIRE_IN) * 24 * 60 * 60 * 1000,   //90days
+      ),
       httpOnly: true,
    };
 
    if (process.env.NODE_ENV === 'production') cookieOption.secure = true;
 
+   //Remove the password from output
+   user.password = undefined;
+
    res.cookie('jwt', token, cookieOption);
    res.status(statusCode).json({
       message: 'Success!',
       token: token,
-      user,
+      user
    });
 };
 
