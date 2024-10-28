@@ -12,7 +12,7 @@ update later...
 node v18.20.4 (npm v10.7.0)
 
 ## ENV EXAMPLE
-``
+```
 MONGODB_PASSWORD=
 MONGODB_HOST=
 MONGODB_DB=
@@ -31,7 +31,7 @@ EMAIL_USERNAME=
 EMAIL_PASSWORD=
 EMAIL_HOST=
 EMAIL_PORT=
-``
+```
 
 ## API Usage
 
@@ -49,7 +49,7 @@ Add new Tour 👉🏻  POST `/api/v1/tour/`
 
 Form data example: 
 
-```
+```json
 {
     "name": "The Sea Explorer",
     "duration": 7,
