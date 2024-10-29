@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
 import { ITour } from '../constans/Tour';
+import User from './User.model'
 
 const tourSchemas = new Schema<ITour>(
    {
@@ -78,6 +79,36 @@ const tourSchemas = new Schema<ITour>(
          type: Boolean,
          default: false,
       },
+      startLocation: {
+         //GeoJson
+         type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+         },
+         coordinates: [Number],
+         address: String,
+         desciption: String
+      },
+      location: [
+         {
+            type: {
+               type: String,
+               default: 'Point',
+               enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            desciption: String,
+            day: Number
+         }
+      ],
+      guides: [
+         {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+         }
+      ]
    },
    {
       toJSON: { virtuals: true },
@@ -97,6 +128,17 @@ tourSchemas.pre('save', function (next) {
    this.slug = slugify(this.name, { lower: true });
    next();
 });
+
+tourSchemas.pre(/^find/, function (this: Query<any, any>, next) {
+   this.select('-__v'); // Exclude the __v field from the results
+   next();
+});
+
+// tourSchemas.pre('save', async function (next) {
+//    const guidesPromises = this.guides.map(async (id: string) => await User.findById(id).select('-passWordChangeAt'))
+//    this.guides = await Promise.all(guidesPromises)
+//    next();
+// });
 
 // tourSchemas.pre('save', function (next) {
 //    if (this.priceDiscount != null && this.price != null && this.priceDiscount >= this.price) {

@@ -56,6 +56,12 @@ const userSchema = new Schema<IUser>(
 );
 
 // Hash the password before saving to the database
+
+userSchema.pre(/^find/, function (this: Query<any, any>, next) {
+   this.select('-__v'); // Exclude the __v field from the results
+   next();
+});
+
 userSchema.pre('save', async function (next) {
    if (!this.isModified('password')) return next();
 

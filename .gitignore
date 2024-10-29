@@ -5,3 +5,4 @@ logs
 .dev.env
 logs
 http.http
+.idea
