@@ -16,7 +16,7 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
    const token = signToken(user);
    const cookieOption: CookieOptions = {
       expires: new Date(
-         Date.now() + Number(process.env.JWT_COOKIE_EXPIRE_IN) * 24 * 60 * 60 * 1000,   //90days
+         Date.now() + Number(process.env.JWT_COOKIE_EXPIRE_IN) * 24 * 60 * 60 * 1000, //90days
       ),
       httpOnly: true,
    };
@@ -30,7 +30,7 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
    res.status(statusCode).json({
       message: 'Success!',
       token: token,
-      user
+      user,
    });
 };
 

@@ -13,7 +13,6 @@ import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 // import {xss} from 'xss-clean/lib/xss';
 
-
 //Connect to db
 db.connect();
 const app = express();

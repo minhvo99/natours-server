@@ -35,7 +35,7 @@ export const getTourbyId = async (req: Request, res: Response, next: NextFunctio
    try {
       const tour = await Tour.findById(req.params.id).populate({
          path: 'guides',
-         select: '-passWordChangeAt'
+         select: '-passWordChangeAt',
       });
       if (!tour) {
          return next(new AppError('No tour found with that ID', 404));

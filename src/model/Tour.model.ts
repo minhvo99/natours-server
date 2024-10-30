@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
 import { ITour } from '../constans/Tour';
-import User from './User.model'
+import User from './User.model';
 
 const tourSchemas = new Schema<ITour>(
    {
@@ -84,31 +84,31 @@ const tourSchemas = new Schema<ITour>(
          type: {
             type: String,
             default: 'Point',
-            enum: ['Point']
+            enum: ['Point'],
          },
          coordinates: [Number],
          address: String,
-         desciption: String
+         desciption: String,
       },
       location: [
          {
             type: {
                type: String,
                default: 'Point',
-               enum: ['Point']
+               enum: ['Point'],
             },
             coordinates: [Number],
             address: String,
             desciption: String,
-            day: Number
-         }
+            day: Number,
+         },
       ],
       guides: [
          {
             type: mongoose.Schema.ObjectId,
-            ref: 'User'
-         }
-      ]
+            ref: 'User',
+         },
+      ],
    },
    {
       toJSON: { virtuals: true },
