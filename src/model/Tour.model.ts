@@ -3,7 +3,6 @@ import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
 import { ITour } from '../constans/Tour';
-import User from './User.model';
 
 const tourSchemas = new Schema<ITour>(
    {
@@ -129,8 +128,16 @@ tourSchemas.pre('save', function (next) {
    next();
 });
 
-tourSchemas.pre(/^find/, function (this: Query<any, any>, next) {
+tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
    this.select('-__v'); // Exclude the __v field from the results
+   next();
+});
+
+tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
+   this.populate({
+      path: 'guides',
+      select: '-passWordChangeAt',
+   });
    next();
 });
 
@@ -148,7 +155,7 @@ tourSchemas.pre(/^find/, function (this: Query<any, any>, next) {
 // });
 
 //QUERY MIDDLEWARE
-tourSchemas.pre(/^find/, function (this: Query<any, any>, next) {
+tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
    this.find({ secretTour: { $ne: true } });
    next();
 });

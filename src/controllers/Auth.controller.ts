@@ -233,3 +233,20 @@ export const updatePassword = async (req: Request, res: Response, next: NextFunc
       next(error);
    }
 };
+
+export const activeAccount = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const result = await User.findOneAndUpdate({ email: req.body.email }, { active: true });
+      if (!result) {
+         return next(new AppError(`User with email ${req.body.email} does not exist`, 404));
+      }
+
+      res.status(200).json({
+         message: `User with email ${req.body.email} activated successfully!`,
+         data: result,
+      });
+   } catch (error) {
+      logger.error(`Fail to active account: ${error}`);
+      next(error);
+   }
+};
