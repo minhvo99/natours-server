@@ -2,7 +2,6 @@ import mongoose, { Schema } from 'mongoose';
 import { IReview } from '../constans/Review';
 import { Query } from 'mongoose';
 
-
 const reviewSchemas = new Schema<IReview>(
    {
       review: {
@@ -36,21 +35,20 @@ const reviewSchemas = new Schema<IReview>(
 );
 
 reviewSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
-  this.select('-__v');
-  next();
+   this.select('-__v');
+   next();
 });
 
-reviewSchemas.pre(/^find/, function(this: Query<unknown, unknown>, next){
-  this.populate({
-    path: 'tour',
-    select: 'name'
-  }).populate({
-    path: 'user',
-    select: 'name photo',
-  });
-  next();
+reviewSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
+   this.populate({
+      path: 'tour',
+      select: 'name',
+   }).populate({
+      path: 'user',
+      select: 'name photo',
+   });
+   next();
 });
-
 
 const Review = mongoose.model<IReview>('Review', reviewSchemas);
 
