@@ -40,10 +40,14 @@ reviewSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
 });
 
 reviewSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
+   //  this.populate({
+   //     path: 'tour',
+   //     select: 'name',
+   //  }).populate({
+   //     path: 'user',
+   //     select: 'name photo',
+   //  });
    this.populate({
-      path: 'tour',
-      select: 'name',
-   }).populate({
       path: 'user',
       select: 'name photo',
    });

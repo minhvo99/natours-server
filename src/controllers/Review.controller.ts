@@ -1,10 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import Review from '../model/Review.model';
 import logger from '../logger/winston';
+import { deleteOne } from './HandleFactory';
 
 export const getAllReviews = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const review = await Review.find();
+      let filter = {};
+      if (req.params.id) filter = { tour: req.params.id };
+      const review = await Review.find(filter);
       res.status(200).json({
          message: 'Get all review successfully!',
          total: review.length,
@@ -18,11 +21,11 @@ export const getAllReviews = async (req: Request, res: Response, next: NextFunct
 
 export const createReview = async (req: Request, res: Response, next: NextFunction) => {
    try {
+      if (!req.body.tour) req.body.tour = req.params.id;
       const newReview = await Review.create({
          ...req.body,
          user: (req as any).user.id,
       });
-      // const newReview = await Review.create(req.body);
       res.status(201).json({
          message: 'Create new review successfully!',
          data: {
@@ -34,3 +37,5 @@ export const createReview = async (req: Request, res: Response, next: NextFuncti
       next(error);
    }
 };
+
+export const deleteReview = deleteOne(Review, 'Delete a veview');

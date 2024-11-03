@@ -3,6 +3,7 @@ import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
 import APIFeature from '../utils/apiFeature';
 import AppError from '../utils/appError';
+import { deleteOne } from './HandleFactory';
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
@@ -33,7 +34,7 @@ export const getAllTour = async (req: Request, res: Response, next: NextFunction
 
 export const getTourbyId = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const tour = await Tour.findById(req.params.id);
+      const tour = await Tour.findById(req.params.id).populate('reviews');
       if (!tour) {
          return next(new AppError('No tour found with that ID', 404));
       }
@@ -82,21 +83,7 @@ export const updateTour = async (req: Request, res: Response, next: NextFunction
    }
 };
 
-export const deleteTour = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-      const { id } = req.params;
-      const result = await Tour.findByIdAndDelete(id);
-      if (!result) {
-         return next(new AppError('No document found with that ID', 404));
-      }
-      res.status(200).json({
-         messgage: `Delete tour id: ${id} successfully!`,
-      });
-   } catch (error) {
-      logger.error(`Delete tour error: ${error}`);
-      next(error);
-   }
-};
+export const deleteTour = deleteOne(Tour, 'Delete tour');
 
 export const getTourStast = async (req: Request, res: Response, next: NextFunction) => {
    try {

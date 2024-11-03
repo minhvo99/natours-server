@@ -1,10 +1,11 @@
 import express from 'express';
 import { authorization, restrictTo } from '../controllers/Auth.controller';
-import { createReview, getAllReviews } from '../controllers/Review.controller';
+import { createReview, getAllReviews, deleteReview } from '../controllers/Review.controller';
 
-const reviewRoute = express.Router();
+const reviewRoute = express.Router({ mergeParams: true });
 
-reviewRoute.get('/all-review', getAllReviews);
-reviewRoute.post('/new-review', authorization, createReview);
+reviewRoute.route('/').get(authorization, getAllReviews).post(authorization, createReview);
+
+reviewRoute.delete('/:id', authorization, deleteReview);
 
 export default reviewRoute;

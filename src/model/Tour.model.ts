@@ -122,6 +122,14 @@ tourSchemas.virtual('durationWeeks').get(function () {
    }
    return (this.duration / 7).toFixed(1);
 });
+
+// Vitural populated
+tourSchemas.virtual('reviews', {
+   ref: 'Review',
+   foreignField: 'tour',
+   localField: '_id',
+});
+
 // DOCUMENT MIDDLEWARE: runs before .save() and  .create()
 tourSchemas.pre('save', function (next) {
    this.slug = slugify(this.name, { lower: true });
