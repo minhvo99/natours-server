@@ -136,7 +136,7 @@ tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
 tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
    this.populate({
       path: 'guides',
-      select: '-passWordChangeAt',
+      select: '-passWordChangeAt -role',
    });
    next();
 });
