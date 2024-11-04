@@ -5,8 +5,9 @@ dotenv.config();
 const SERECT = process.env.JWT_SECRET_KEY as Secret;
 const expiresIn = process.env.JWT_EXPIRE_IN;
 
-export const signToken = (userName: string, id: string | any): string => {
-   return jwt.sign({ userName, id }, SERECT, { expiresIn: expiresIn });
+export const signToken = (user: any): string => {
+   const { id, name, email, role } = user;
+   return jwt.sign({ id, name, email, role }, SERECT, { expiresIn: expiresIn });
 };
 
 // export const refreshToken =

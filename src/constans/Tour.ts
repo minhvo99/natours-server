@@ -1,4 +1,5 @@
-export interface ITour {
+import { Document } from 'mongoose';
+export interface ITour extends Document {
    name: string;
    duration: number;
    slug?: string;
@@ -15,4 +16,18 @@ export interface ITour {
    createdAt?: Date;
    startDates?: Date[];
    secretTour?: boolean;
+   startLocation?: {
+      type: 'Point';
+      coordinates: number[];
+      address?: string;
+      description?: string;
+   };
+   location?: Array<{
+      type: 'Point';
+      coordinates: number[];
+      address?: string;
+      description?: string;
+      day: number;
+   }>;
+   guides: any[];
 }

@@ -78,6 +78,36 @@ const tourSchemas = new Schema<ITour>(
          type: Boolean,
          default: false,
       },
+      startLocation: {
+         //GeoJson
+         type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point'],
+         },
+         coordinates: [Number],
+         address: String,
+         desciption: String,
+      },
+      location: [
+         {
+            type: {
+               type: String,
+               default: 'Point',
+               enum: ['Point'],
+            },
+            coordinates: [Number],
+            address: String,
+            desciption: String,
+            day: Number,
+         },
+      ],
+      guides: [
+         {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User',
+         },
+      ],
    },
    {
       toJSON: { virtuals: true },
@@ -92,11 +122,38 @@ tourSchemas.virtual('durationWeeks').get(function () {
    }
    return (this.duration / 7).toFixed(1);
 });
+
+// Vitural populated
+tourSchemas.virtual('reviews', {
+   ref: 'Review',
+   foreignField: 'tour',
+   localField: '_id',
+});
+
 // DOCUMENT MIDDLEWARE: runs before .save() and  .create()
 tourSchemas.pre('save', function (next) {
    this.slug = slugify(this.name, { lower: true });
    next();
 });
+
+tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
+   this.select('-__v'); // Exclude the __v field from the results
+   next();
+});
+
+tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
+   this.populate({
+      path: 'guides',
+      select: '-passWordChangeAt -role',
+   });
+   next();
+});
+
+// tourSchemas.pre('save', async function (next) {
+//    const guidesPromises = this.guides.map(async (id: string) => await User.findById(id).select('-passWordChangeAt'))
+//    this.guides = await Promise.all(guidesPromises)
+//    next();
+// });
 
 // tourSchemas.pre('save', function (next) {
 //    if (this.priceDiscount != null && this.price != null && this.priceDiscount >= this.price) {
@@ -106,7 +163,7 @@ tourSchemas.pre('save', function (next) {
 // });
 
 //QUERY MIDDLEWARE
-tourSchemas.pre(/^find/, function (this: Query<any, any>, next) {
+tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
    this.find({ secretTour: { $ne: true } });
    next();
 });

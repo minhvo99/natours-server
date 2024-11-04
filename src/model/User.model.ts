@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Query, Schema } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import { IUser } from '../constans/User';
@@ -38,12 +38,16 @@ const userSchema = new Schema<IUser>(
       passWordChangeAt: Date,
       role: {
          type: String,
-         enum: ['user', 'guide', 'lead-guide', 'admin'],
-         default: 'user',
+         enum: ['guest', 'guide', 'lead-guide', 'admin'],
+         default: 'guest',
       },
       passWordResetToken: String,
       passWordResetExpires: Date,
-      // active: Boolean,
+      active: {
+         type: Boolean,
+         default: true,
+         select: false,
+      },
    },
    {
       toJSON: { virtuals: true },
@@ -52,6 +56,12 @@ const userSchema = new Schema<IUser>(
 );
 
 // Hash the password before saving to the database
+
+userSchema.pre(/^find/, function (this: Query<any, any>, next) {
+   this.select('-__v'); // Exclude the __v field from the results
+   next();
+});
+
 userSchema.pre('save', async function (next) {
    if (!this.isModified('password')) return next();
 
@@ -59,6 +69,19 @@ userSchema.pre('save', async function (next) {
    this.passWordConfirm = undefined;
    next();
 });
+
+// userSchema.pre(/^find/, function (this: Query<any, any>, next) {
+//    this.find({ active: { $ne: false } });
+//    next();
+// });
+
+userSchema.pre('save', function (next) {
+   if (!this.isModified('password') || this.isNew) return next();
+
+   this.passWordChangeAt = Date.now() - 1000;
+   next();
+});
+
 userSchema.methods.correctPassword = async function (
    candidatePassword: string,
    userPassword: string,
@@ -80,7 +103,6 @@ userSchema.methods.createPasswordResetToken = function () {
    this.passWordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
    this.passWordResetExpires = Date.now() + 10 * 60 * 1000; //10 minutes
-   console.log({ resetToken }, this.passWordResetToken);
 
    return resetToken;
 };
