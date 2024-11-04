@@ -2,6 +2,7 @@ import User from '../model/User.model';
 import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
+import { getOne } from './HandleFactory';
 
 const filterObj = (obj: { [key: string]: any }, ...allowUpdated: string[]) => {
    const newObj: { [key: string]: any } = {};
@@ -24,6 +25,13 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
       logger.error(`Get all user error: ${error}`);
       next(error);
    }
+};
+
+export const getUserbyId = getOne(User, 'get user', '');
+
+export const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
+  req.params.id = (req as any).user.id;
+   next();
 };
 
 export const updateMyProfile = async (req: Request, res: Response, next: NextFunction) => {
@@ -50,7 +58,10 @@ export const updateMyProfile = async (req: Request, res: Response, next: NextFun
          status: 'success',
          user,
       });
-   } catch (error) {}
+   } catch (error) {
+      logger.error(`Update profile fail: ${error}`);
+      next(error);
+   }
 };
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {

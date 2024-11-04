@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
-import APIFeature from '../utils/apiFeature';
-import AppError from '../utils/appError';
-import { deleteOne } from './HandleFactory';
+import { deleteOne, updateOne, createOne, getOne, getAll } from './HandleFactory';
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
@@ -12,76 +10,13 @@ export const aliasTopTours = (req: Request, res: Response, next: NextFunction) =
    next();
 };
 
-export const getAllTour = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-      const feature = new APIFeature(Tour.find(), req.query)
-         .filter()
-         .sort()
-         .limitFields()
-         .paginate();
+export const getAllTour = getAll(Tour, 'Get all tour');
 
-      const tours = await feature.query;
-      res.status(200).json({
-         message: 'Get all tours successfully!',
-         total: tours.length,
-         data: tours,
-      });
-   } catch (error) {
-      logger.error(`Get all tours error: ${error}`);
-      next(error);
-   }
-};
+export const getTourbyId = getOne(Tour, 'Tour', 'reviews');
 
-export const getTourbyId = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-      const tour = await Tour.findById(req.params.id).populate('reviews');
-      if (!tour) {
-         return next(new AppError('No tour found with that ID', 404));
-      }
-      res.status(200).json({
-         message: 'Get tour by id successfully!',
-         data: tour,
-      });
-   } catch (error) {
-      logger.error(`Get tour by id error: ${error}`);
-      next(error);
-   }
-};
+export const createTour = createOne(Tour, 'Tour');
 
-export const createTour = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-      const newTour = await Tour.create(req.body);
-      res.status(201).json({
-         message: 'Create a new tour successfully!',
-         data: newTour,
-      });
-   } catch (error: any) {
-      logger.error(`Create tour error: ${error}`);
-      next(error);
-   }
-};
-
-export const updateTour = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-      if (Object.keys(req.body).length === 0) {
-         return next(new AppError('Tour to update can not be empty!', 400));
-      }
-      const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-         new: true,
-         runValidators: true,
-      });
-      if (!tour) {
-         return next(new AppError('Tour not found', 404));
-      }
-      res.status(200).json({
-         message: 'Update tour successfully!',
-         data: tour,
-      });
-   } catch (error) {
-      logger.error(`Update tour error: ${error}`);
-      next(error);
-   }
-};
+export const updateTour = updateOne(Tour, 'Tour');
 
 export const deleteTour = deleteOne(Tour, 'Delete tour');
 
