@@ -114,6 +114,9 @@ const tourSchemas = new Schema<ITour>(
       toObject: { virtuals: true },
    },
 );
+// set Indexes for improving read performance docs. 1 is asc, -1 is desc
+// tourSchemas.index({ price: 1, ratingsAverage: -1  });
+// tourSchemas.index({ slug : 1 })
 
 // VIRTUAL PROPERTIES
 tourSchemas.virtual('durationWeeks').get(function () {
