@@ -30,7 +30,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
 export const getUserbyId = getOne(User, 'get user', '');
 
 export const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
-  req.params.id = (req as any).user.id;
+   req.params.id = (req as any).user.id;
    next();
 };
 

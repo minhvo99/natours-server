@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
 import { deleteOne, updateOne, createOne, getOne, getAll } from './HandleFactory';
+import AppError from '../utils/appError';
+import { earthRadiusIsKm, earthRadiusIsMi } from '../constans/constant';
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
@@ -95,6 +97,75 @@ export const getMonthlyPlan = async (req: Request, res: Response, next: NextFunc
       });
    } catch (error) {
       logger.error(`Get Monthly plan error: ${error}`);
+      next(error);
+   }
+};
+
+export const getTourWithin = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      ///tours-within/:distance/center/:latlng/unit/:unit
+      const { distance, latlng, unit } = req.params;
+      const [lat, lng] = latlng.split(',');
+      if (!lat || !lng) {
+         return next(
+            new AppError('Please provide latitude and logtitude in the format lat,lng.', 400),
+         );
+      }
+      const radius =
+         unit === 'mi' ? Number(distance) / earthRadiusIsMi : Number(distance) / earthRadiusIsKm;
+      const tours = await Tour.find({
+         startLocation: {
+            $geoWithin: {
+               $centerSphere: [[lng, lat], radius],
+            },
+         },
+      });
+      res.status(200).json({
+         message: 'success',
+         data: { tours },
+      });
+   } catch (error) {
+      logger.error(`Fail to get tour within: ${error}`);
+      next(error);
+   }
+};
+
+export const getDistances = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const { latlng, unit } = req.params;
+      const [lat, lng] = latlng.split(',');
+      if (!lat || !lng) {
+         return next(
+            new AppError('Please provide latitude and logtitude in the format lat,lng.', 400),
+         );
+      }
+      // convert meter to miles:
+      const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+      const distance = await Tour.aggregate([
+         {
+            $geoNear: {
+               near: {
+                  type: 'Point',
+                  coordinates: [Number(lng), Number(lat)],
+               },
+               distanceField: 'distance',
+               distanceMultiplier: multiplier,
+            },
+         },
+         {
+            $project: {
+               distance: 1,
+               name: 1,
+            },
+         },
+      ]);
+      res.status(200).json({
+         message: 'success',
+         data: { distance },
+      });
+   } catch (error) {
+      logger.error(`Fail to get distance: ${error}`);
       next(error);
    }
 };

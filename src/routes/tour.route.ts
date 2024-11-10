@@ -4,9 +4,11 @@ import {
    createTour,
    deleteTour,
    getAllTour,
+   getDistances,
    getMonthlyPlan,
    getTourbyId,
    getTourStast,
+   getTourWithin,
    updateTour,
 } from '../controllers/Tour.controller';
 import { authorization, restrictTo } from '../controllers/Auth.controller';
@@ -24,6 +26,8 @@ tourRoute.get(
    restrictTo('admin', 'lead-guide', 'guide'),
    getMonthlyPlan,
 );
+tourRoute.get('/tours-within/:distance/center/:latlng/unit/:unit', getTourWithin);
+tourRoute.get('/distances/:latlng/unit/:unit', getDistances);
 tourRoute
    .route('/')
    .get(authorization, getAllTour)

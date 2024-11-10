@@ -147,8 +147,7 @@ export const forgotPassWord = async (req: Request, res: Response, next: NextFunc
 
    const resetURL = `${req.protocol}://${req.get('host')}/api/vi/users/reset-password/${resetToken}`;
 
-   const message = `Forgot your password? Submit a PATCH request with your new password and password confirm to: ${resetURL}. 
-   \nIf you didn't forget your password, please ignore this email!`;
+   const message = `Click the <a href="${resetURL}">URL</a> to reset the password.`;
    try {
       await sendEmail({
          email: user.email,
@@ -189,7 +188,7 @@ export const resetPassWord = async (req: Request, res: Response, next: NextFunct
       user.passWordResetToken = undefined;
       user.passWordResetExpires = undefined;
 
-      await user.save();
+      await user.save({ validateBeforeSave: false });
 
       //3) Update changePasswordAt property for the user
 

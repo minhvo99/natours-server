@@ -35,6 +35,8 @@ const reviewSchemas = new Schema<IReview>(
    },
 );
 
+reviewSchemas.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
    this.select('-__v');
    next();
@@ -76,7 +78,7 @@ reviewSchemas.statics.calcAverageRating = async function (tourId: Types.ObjectId
    } else {
       await Tour.findByIdAndUpdate(tourId, {
          ratingsQuantity: 0,
-         ratingsAverage: 4.5,
+         ratingsAverage: 0,
       });
    }
 };
