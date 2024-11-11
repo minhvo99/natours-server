@@ -4,6 +4,45 @@ import logger from '../logger/winston';
 import { deleteOne, updateOne, createOne, getOne, getAll } from './HandleFactory';
 import AppError from '../utils/appError';
 import { earthRadiusIsKm, earthRadiusIsMi } from '../constans/constant';
+import multer, { FileFilterCallback } from 'multer';
+import sharp from 'sharp';
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+   if (file.mimetype.startsWith('image')) {
+      cb(null, true);
+   } else {
+      cb(new AppError('Not an image! Please upload only imaged.', 400));
+   }
+};
+
+const upload = multer({
+   storage: multerStorage,
+   fileFilter: multerFilter,
+});
+
+export const uploadTourImage = upload.fields([
+   { name: 'imageCover', maxCount: 1 },
+   { name: 'images', maxCount: 3 },
+]);
+
+export const reSizeTourImages = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      if (!(req as any).files.imageCover || !(req as any).files?.images) return next();
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      req.body.imageCover = `tour-${req.params.id}-${uniqueSuffix}-cover.jpeg`;
+      await sharp((req as any).files?.imageCover[0].buffer)
+         .resize(2000, 1333)
+         .toFormat('jpeg')
+         .jpeg({ quality: 90 })
+         .toFile(`publics/imgs/${req.body.imageCover}`);
+      next();
+   } catch (error) {
+      logger.error(`Fail to reSizeTourImage: ${error}`);
+      next(error);
+   }
+};
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';

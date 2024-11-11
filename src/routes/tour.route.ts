@@ -9,7 +9,9 @@ import {
    getTourbyId,
    getTourStast,
    getTourWithin,
+   reSizeTourImages,
    updateTour,
+   uploadTourImage,
 } from '../controllers/Tour.controller';
 import { authorization, restrictTo } from '../controllers/Auth.controller';
 import reviewRoute from './review.route';
@@ -35,7 +37,13 @@ tourRoute
 tourRoute
    .route('/:id')
    .get(getTourbyId)
-   .put(authorization, restrictTo('admin', 'lead-guide'), updateTour)
+   .patch(
+      authorization,
+      restrictTo('admin', 'lead-guide'),
+      uploadTourImage,
+      reSizeTourImages,
+      updateTour,
+   )
    .delete(authorization, restrictTo('admin', 'lead-guide'), deleteTour);
 
 // tourRoute.post('/:id/reviews', authorization, restrictTo('guest'), createReview);
