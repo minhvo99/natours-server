@@ -58,7 +58,6 @@ app.use(mongoSanitize());
 //Static file
 app.use(express.static(`${__dirname}/assets`));
 
-
 app.use('/api/v1', appRouter);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {

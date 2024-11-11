@@ -29,10 +29,14 @@ export const uploadTourImage = upload.fields([
 
 export const reSizeTourImages = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      if (!(req as any).files.imageCover || !(req as any).files?.images) return next();
+      const files = req.files as {
+         imageCover?: Express.Multer.File[];
+         images?: Express.Multer.File[];
+      };
+      if (!files.imageCover || !files.images) return next();
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       req.body.imageCover = `tour-${req.params.id}-${uniqueSuffix}-cover.jpeg`;
-      await sharp((req as any).files?.imageCover[0].buffer)
+      await sharp((files.imageCover as Express.Multer.File[])[0].buffer)
          .resize(2000, 1333)
          .toFormat('jpeg')
          .jpeg({ quality: 90 })
