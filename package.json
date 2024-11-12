@@ -13,9 +13,11 @@
       "prettier:fix": "prettier --write ."
    },
    "dependencies": {
+      "@typescript-eslint/parser": "^8.14.0",
       "bcrypt": "^5.1.1",
       "bcryptjs": "^2.4.3",
       "body-parser": "^1.20.2",
+      "compression": "^1.7.5",
       "cors": "^2.8.5",
       "dotenv": "^16.4.5",
       "email-validator": "^2.0.4",
@@ -57,8 +59,8 @@
       "@types/nodemailer": "^6.4.16",
       "@types/pug": "^2.0.10",
       "@types/validator": "^13.12.2",
-      "@typescript-eslint/eslint-plugin": "^7.16.0",
-      "eslint": "^9.14.0",
+      "@typescript-eslint/eslint-plugin": "^8.14.0",
+      "eslint": "^8.57.1",
       "eslint-config-prettier": "^9.1.0",
       "eslint-plugin-prettier": "^5.2.1",
       "globals": "^15.11.0",
