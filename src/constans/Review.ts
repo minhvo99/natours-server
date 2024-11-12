@@ -7,4 +7,5 @@ export interface IReview extends Document {
    createdAt: Date;
    tour: Types.ObjectId;
    user: Types.ObjectId;
+   calcAverageRating(tourId: Types.ObjectId): Promise<[]>;
 }

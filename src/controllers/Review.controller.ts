@@ -31,7 +31,7 @@ export const setUserandIdUser = (req: Request, res: Response, next: NextFunction
    next();
 };
 
-export const getReviewById = getOne(Review, 'get review', '');
+export const getReviewById = getOne(Review, 'review', '');
 
 export const createReview = createOne(Review, 'Review');
 

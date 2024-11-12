@@ -2,6 +2,67 @@ import { NextFunction, Request, Response } from 'express';
 import Tour from '../model/Tour.model';
 import logger from '../logger/winston';
 import { deleteOne, updateOne, createOne, getOne, getAll } from './HandleFactory';
+import AppError from '../utils/appError';
+import { earthRadiusIsKm, earthRadiusIsMi } from '../constans/constant';
+import multer, { FileFilterCallback } from 'multer';
+import sharp from 'sharp';
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+   if (file.mimetype.startsWith('image')) {
+      cb(null, true);
+   } else {
+      cb(new AppError('Not an image! Please upload only imaged.', 400));
+   }
+};
+
+const upload = multer({
+   storage: multerStorage,
+   fileFilter: multerFilter,
+});
+
+export const uploadTourImage = upload.fields([
+   { name: 'imageCover', maxCount: 1 },
+   { name: 'images', maxCount: 3 },
+]);
+
+export const reSizeTourImages = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const files = req.files as {
+         imageCover?: Express.Multer.File[];
+         images?: Express.Multer.File[];
+      };
+      if (!files.imageCover || !files.images) return next();
+      //1) Cover image
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      req.body.imageCover = `tour-${req.params.id}-${uniqueSuffix}-cover.jpeg`;
+      await sharp((files.imageCover as Express.Multer.File[])[0].buffer)
+         .resize(2000, 1333)
+         .toFormat('jpeg')
+         .jpeg({ quality: 90 })
+         .toFile(`publics/imgs/${req.body.imageCover}`);
+
+      //2) Images
+      req.body.images = [];
+      await Promise.all(
+         files.images.map(async (file: Express.Multer.File, idx: number) => {
+            const fileName = `tour-${req.params.id}-${uniqueSuffix}-${idx + 1}.jpeg`;
+
+            await sharp(file.buffer)
+               .resize(2000, 1333)
+               .toFormat('jpeg')
+               .jpeg({ quality: 90 })
+               .toFile(`publics/imgs/${fileName}`);
+            req.body.images.push(fileName);
+         }),
+      );
+      next();
+   } catch (error) {
+      logger.error(`Fail to reSizeTourImage: ${error}`);
+      next(error);
+   }
+};
 
 export const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
    req.query.limit = '5';
@@ -95,6 +156,75 @@ export const getMonthlyPlan = async (req: Request, res: Response, next: NextFunc
       });
    } catch (error) {
       logger.error(`Get Monthly plan error: ${error}`);
+      next(error);
+   }
+};
+
+export const getTourWithin = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      ///tours-within/:distance/center/:latlng/unit/:unit
+      const { distance, latlng, unit } = req.params;
+      const [lat, lng] = latlng.split(',');
+      if (!lat || !lng) {
+         return next(
+            new AppError('Please provide latitude and logtitude in the format lat,lng.', 400),
+         );
+      }
+      const radius =
+         unit === 'mi' ? Number(distance) / earthRadiusIsMi : Number(distance) / earthRadiusIsKm;
+      const tours = await Tour.find({
+         startLocation: {
+            $geoWithin: {
+               $centerSphere: [[lng, lat], radius],
+            },
+         },
+      });
+      res.status(200).json({
+         message: 'success',
+         data: { tours },
+      });
+   } catch (error) {
+      logger.error(`Fail to get tour within: ${error}`);
+      next(error);
+   }
+};
+
+export const getDistances = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const { latlng, unit } = req.params;
+      const [lat, lng] = latlng.split(',');
+      if (!lat || !lng) {
+         return next(
+            new AppError('Please provide latitude and logtitude in the format lat,lng.', 400),
+         );
+      }
+      // convert meter to miles:
+      const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+      const distance = await Tour.aggregate([
+         {
+            $geoNear: {
+               near: {
+                  type: 'Point',
+                  coordinates: [Number(lng), Number(lat)],
+               },
+               distanceField: 'distance',
+               distanceMultiplier: multiplier,
+            },
+         },
+         {
+            $project: {
+               distance: 1,
+               name: 1,
+            },
+         },
+      ]);
+      res.status(200).json({
+         message: 'success',
+         data: { distance },
+      });
+   } catch (error) {
+      logger.error(`Fail to get distance: ${error}`);
       next(error);
    }
 };

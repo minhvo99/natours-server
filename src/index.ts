@@ -1,5 +1,4 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
 import appRouter from './routes/index';
@@ -11,6 +10,7 @@ import logger from './logger/winston';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
+// import bodyParser from 'body-parser';
 // import {xss} from 'xss-clean/lib/xss';
 
 //Connect to db
@@ -38,12 +38,23 @@ const limiter = rateLimit({
 
 app.use('/api', limiter);
 
+// Stripe webhook, BEFORE body-parser, because stripe needs the body as stream
+// app.post(
+//   "/webhook-checkout",
+//   bodyParser.raw({ type: "application/json" }),
+//   webhookCheckout
+// );
+
 // Body parser, reading data from body into req.body
-app.use(
-   bodyParser.json({
-      limit: '100kb',
-   }),
-);
+// app.use(
+//    bodyParser.json({
+//       limit: '100kb',
+//    }),
+// );
+// app.use(bodyParser.urlencoded({ extended: true }));
+// From express version 4.16.0, body-parser has been integrated to express.
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true }));
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -53,7 +64,6 @@ app.use(mongoSanitize());
 
 //Static file
 app.use(express.static(`${__dirname}/assets`));
-app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api/v1', appRouter);
 

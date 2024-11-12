@@ -3,10 +3,10 @@ import { Request, Response, NextFunction, CookieOptions } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
 import dotenv from 'dotenv';
-import { AuthRequestBody, IUser } from '../constans/User';
+import { IUser } from '../constans/User';
 import { signToken } from '../utils/auth';
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
-import { sendEmail } from '../utils/email';
+import Email from '../utils/email';
 import crypto from 'crypto';
 
 dotenv.config();
@@ -34,16 +34,18 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
    });
 };
 
-export const signUp = async (
-   req: Request<{}, {}, AuthRequestBody>,
-   res: Response,
-   next: NextFunction,
-) => {
+export const signUp = async (req: Request, res: Response, next: NextFunction) => {
    try {
       // let password = req.body.password;
       // const hashedPassword = await bcrypt.hash(password, 12);
       // req.body.password = hashedPassword;
       // req.body.passWordConfirm = undefined;
+      //Import dev data
+      // const data = await User.create(req.body, { validateBeforeSave: false });
+      // res.status(201).json({
+      //    message: 'import user success fully',
+      //    data,
+      // });
       const newUser = await User.create({
          name: req.body.name,
          email: req.body.email,
@@ -51,6 +53,8 @@ export const signUp = async (
          passWordConfirm: req.body.passWordConfirm,
          passWordChangeAt: req.body.passWordChangeAt || null,
       });
+      const url = `${req.protocol}://${req.get('host')}/api/v1/user/me`;
+      await new Email(newUser, url).sendWelcome();
       createSendToken(newUser, 201, res);
    } catch (error) {
       logger.error(`Create user error: ${error}`);
@@ -58,11 +62,7 @@ export const signUp = async (
    }
 };
 
-export const logIn = async (
-   req: Request<{}, {}, AuthRequestBody>,
-   res: Response,
-   next: NextFunction,
-) => {
+export const logIn = async (req: Request, res: Response, next: NextFunction) => {
    try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -84,11 +84,7 @@ export const logIn = async (
    }
 };
 
-export const authorization = async (
-   req: Request<{}, {}, AuthRequestBody>,
-   res: Response,
-   next: NextFunction,
-) => {
+export const authorization = async (req: Request, res: Response, next: NextFunction) => {
    try {
       //1) getting token and check of if's there
       let token = '';
@@ -127,8 +123,8 @@ export const authorization = async (
    }
 };
 
-export const restrictTo = (...roles: any[]) => {
-   return (req: Request<{}, {}, AuthRequestBody>, res: Response, next: NextFunction) => {
+export const restrictTo = (...roles: string[]) => {
+   return (req: Request, res: Response, next: NextFunction) => {
       if (!roles.includes((req as any).user.role)) {
          return next(new AppError('You do not have permission.', 403));
       }
@@ -136,11 +132,7 @@ export const restrictTo = (...roles: any[]) => {
    };
 };
 
-export const forgotPassWord = async (
-   req: Request<{}, {}, AuthRequestBody>,
-   res: Response,
-   next: NextFunction,
-) => {
+export const forgotPassWord = async (req: Request, res: Response, next: NextFunction) => {
    //1) Get user based on POSTed email
 
    const user = await User.findOne({ email: req.body.email });
@@ -155,16 +147,9 @@ export const forgotPassWord = async (
 
    //3) Send it to user's email
 
-   const resetURL = `${req.protocol}://${req.get('host')}/api/vi/users/reset-password/${resetToken}`;
-
-   const message = `Forgot your password? Submit a PATCH request with your new password and password confirm to: ${resetURL}. 
-   \nIf you didn't forget your password, please ignore this email!`;
    try {
-      await sendEmail({
-         email: user.email,
-         subject: 'Your password reset token (valid for 10 min)',
-         message,
-      });
+      const resetURL = `${req.protocol}://${req.get('host')}/api/v1/reset-password/${resetToken}`;
+      await new Email(user, resetURL).sendPassWordReset();
 
       res.status(200).json({
          status: 'success',
@@ -199,7 +184,7 @@ export const resetPassWord = async (req: Request, res: Response, next: NextFunct
       user.passWordResetToken = undefined;
       user.passWordResetExpires = undefined;
 
-      await user.save();
+      await user.save({ validateBeforeSave: false });
 
       //3) Update changePasswordAt property for the user
 

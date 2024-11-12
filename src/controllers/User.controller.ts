@@ -3,11 +3,65 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
 import { getOne } from './HandleFactory';
+import multer, { FileFilterCallback } from 'multer';
+import sharp from 'sharp';
 
+// const multerStorage: StorageEngine = multer.diskStorage({
+//    destination: function (
+//       req: Request,
+//       file: Express.Multer.File,
+//       cb: (error: Error | null, destination: string) => void,
+//    ) {
+//       cb(null, 'publics/imgs');
+//    },
+//    filename: function (
+//       req: Request,
+//       file: Express.Multer.File,
+//       cb: (error: Error | null, filename: string) => void,
+//    ) {
+//       const ext = file.mimetype.split('/')[1];
+//       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+//       cb(null, `user-${(req as any).user.id}-${uniqueSuffix}.${ext}`);
+//    },
+// });
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+   if (file.mimetype.startsWith('image')) {
+      cb(null, true);
+   } else {
+      cb(new AppError('Not an image! Please upload only imaged.', 400));
+   }
+};
+
+const upload = multer({
+   storage: multerStorage,
+   fileFilter: multerFilter,
+});
+
+export const uploadUserPhoto = upload.single('photo');
+
+export const reSizephoto = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      if (!req.file) return next();
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      req.file.filename = `user-${(req as any).user.id}-${uniqueSuffix}.jpeg`;
+      await sharp(req.file.buffer)
+         .resize(500, 500)
+         .toFormat('jpeg')
+         .jpeg({ quality: 90 })
+         .toFile(`publics/imgs/${req.file.filename}`);
+      next();
+   } catch (error) {
+      logger.error(`Fail to reSizePhoto: ${error}`);
+      next(error);
+   }
+};
 const filterObj = (obj: { [key: string]: any }, ...allowUpdated: string[]) => {
    const newObj: { [key: string]: any } = {};
    Object.keys(obj).forEach((field: string) => {
-      if (!allowUpdated.includes(field)) {
+      if (allowUpdated.includes(field)) {
          newObj[field] = obj[field];
       }
    });
@@ -30,7 +84,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
 export const getUserbyId = getOne(User, 'get user', '');
 
 export const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
-  req.params.id = (req as any).user.id;
+   req.params.id = (req as any).user.id;
    next();
 };
 
@@ -48,7 +102,8 @@ export const updateMyProfile = async (req: Request, res: Response, next: NextFun
 
       //2) Update user document
 
-      const userUpdate = filterObj(req.body, 'role');
+      const userUpdate = filterObj(req.body, 'email', 'name');
+      if (req.file) userUpdate.photo = req.file.filename;
       const user = await User.findByIdAndUpdate((req as any).user.id, userUpdate, {
          new: true,
          runValidators: true,
