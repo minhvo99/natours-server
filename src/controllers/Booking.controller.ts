@@ -1,5 +1,5 @@
 import { deleteOne, updateOne, createOne, getOne, getAll } from './HandleFactory';
-import Booking from 'src/model/Booking.model';
+import Booking from '../model/Booking.model';
 // import { catchAsync } from 'src/utils/catchAsync';
 // import { NextFunction, Request, Response } from 'express';
 // import Tour from 'src/model/Tour.model';

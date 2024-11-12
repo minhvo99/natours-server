@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Query } from 'mongoose';
-import { IBooking } from 'src/constans/Booking';
+import { IBooking } from '../constans/Booking';
 
 const bookingSchema = new mongoose.Schema<IBooking>({
    tour: {

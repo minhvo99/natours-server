@@ -1,12 +1,12 @@
 import express from 'express';
-import { authorization, restrictTo } from 'src/controllers/Auth.controller';
+import { authorization, restrictTo } from '../controllers/Auth.controller';
 import {
    createBooking,
    deleteBooking,
    getAllBookings,
    getBooking,
    updateBooking,
-} from 'src/controllers/Booking.controller';
+} from '../controllers/Booking.controller';
 
 const bookingRoute = express.Router();
 
