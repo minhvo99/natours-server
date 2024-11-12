@@ -34,6 +34,7 @@ export const reSizeTourImages = async (req: Request, res: Response, next: NextFu
          images?: Express.Multer.File[];
       };
       if (!files.imageCover || !files.images) return next();
+      //1) Cover image
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       req.body.imageCover = `tour-${req.params.id}-${uniqueSuffix}-cover.jpeg`;
       await sharp((files.imageCover as Express.Multer.File[])[0].buffer)
@@ -41,6 +42,21 @@ export const reSizeTourImages = async (req: Request, res: Response, next: NextFu
          .toFormat('jpeg')
          .jpeg({ quality: 90 })
          .toFile(`publics/imgs/${req.body.imageCover}`);
+
+      //2) Images
+      req.body.images = [];
+      await Promise.all(
+         files.images.map(async (file: Express.Multer.File, idx: number) => {
+            const fileName = `tour-${req.params.id}-${uniqueSuffix}-${idx + 1}.jpeg`;
+
+            await sharp(file.buffer)
+               .resize(2000, 1333)
+               .toFormat('jpeg')
+               .jpeg({ quality: 90 })
+               .toFile(`publics/imgs/${fileName}`);
+            req.body.images.push(fileName);
+         }),
+      );
       next();
    } catch (error) {
       logger.error(`Fail to reSizeTourImage: ${error}`);

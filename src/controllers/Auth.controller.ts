@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { IUser } from '../constans/User';
 import { signToken } from '../utils/auth';
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
-import { sendEmail } from '../utils/email';
+import Email from '../utils/email';
 import crypto from 'crypto';
 
 dotenv.config();
@@ -53,6 +53,8 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
          passWordConfirm: req.body.passWordConfirm,
          passWordChangeAt: req.body.passWordChangeAt || null,
       });
+      const url = `${req.protocol}://${req.get('host')}/api/v1/user/me`;
+      await new Email(newUser, url).sendWelcome();
       createSendToken(newUser, 201, res);
    } catch (error) {
       logger.error(`Create user error: ${error}`);
@@ -121,7 +123,7 @@ export const authorization = async (req: Request, res: Response, next: NextFunct
    }
 };
 
-export const restrictTo = (...roles: any[]) => {
+export const restrictTo = (...roles: string[]) => {
    return (req: Request, res: Response, next: NextFunction) => {
       if (!roles.includes((req as any).user.role)) {
          return next(new AppError('You do not have permission.', 403));
@@ -145,15 +147,9 @@ export const forgotPassWord = async (req: Request, res: Response, next: NextFunc
 
    //3) Send it to user's email
 
-   const resetURL = `${req.protocol}://${req.get('host')}/api/vi/users/reset-password/${resetToken}`;
-
-   const message = `Click the <a href="${resetURL}">URL</a> to reset the password.`;
    try {
-      await sendEmail({
-         email: user.email,
-         subject: 'Your password reset token (valid for 10 min)',
-         message,
-      });
+      const resetURL = `${req.protocol}://${req.get('host')}/api/v1/reset-password/${resetToken}`;
+      await new Email(user, resetURL).senPassWordReset();
 
       res.status(200).json({
          status: 'success',
