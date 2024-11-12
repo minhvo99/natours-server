@@ -62,11 +62,11 @@ class Email {
    }
 
    async sendWelcome() {
-      await this.send('welcome', 'Welcome');
+      await this.send('welcome', 'Welcome to Natour');
    }
 
-   async senPassWordReset() {
-      await this.send('passwordReset', 'Password reset token');
+   async sendPassWordReset() {
+      await this.send('passwordReset', 'Your Natour password reset link');
    }
 }
 

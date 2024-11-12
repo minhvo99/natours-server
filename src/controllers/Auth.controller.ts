@@ -149,7 +149,7 @@ export const forgotPassWord = async (req: Request, res: Response, next: NextFunc
 
    try {
       const resetURL = `${req.protocol}://${req.get('host')}/api/v1/reset-password/${resetToken}`;
-      await new Email(user, resetURL).senPassWordReset();
+      await new Email(user, resetURL).sendPassWordReset();
 
       res.status(200).json({
          status: 'success',
