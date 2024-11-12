@@ -2,8 +2,6 @@ import nodemailer, { TransportOptions } from 'nodemailer';
 import { IUser } from 'src/constans/User';
 import pug from 'pug';
 import { convert } from 'html-to-text';
-import path from 'path';
-import fs from 'fs';
 
 interface EmailOptions {
    from: string;
@@ -43,19 +41,11 @@ class Email {
 
    async send(template: string, subject: string) {
       /// 1) Render HTML based on a template, eg Pug
-      // const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
-      //    firstName: this.firstName,
-      //    url: this.url,
-      //    subject,
-      // });
-
-      const templateURL = path.join(__dirname, `../views/email/${template}.html`);
-
-      const html = fs.readFileSync(templateURL, 'utf-8');
-
-      html.replace('{{ firstName }}', this.firstName);
-      html.replace('{{ url }}', this.url);
-      html.replace('{{ subject }}', subject);
+      const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
+         firstName: this.firstName,
+         url: this.url,
+         subject,
+      });
 
       /// 2) Defien email option
       const mailOptions: EmailOptions = {
