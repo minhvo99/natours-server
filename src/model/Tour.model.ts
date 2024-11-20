@@ -3,6 +3,8 @@ import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
 import { ITour } from '../constans/Tour';
+import fs from 'fs';
+import logger from '../logger/winston';
 
 const tourSchemas = new Schema<ITour>(
    {
@@ -170,6 +172,40 @@ tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
 //QUERY MIDDLEWARE
 tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
    this.find({ secretTour: { $ne: true } });
+   next();
+});
+
+tourSchemas.post(/^find/, function (docs, next) {
+   const basePath = 'publics/tours/';
+   const imageCoverPath = `${basePath}${docs.imageCover}`;
+   if (fs.existsSync(imageCoverPath)) {
+      try {
+         const imageCover = fs.readFileSync(imageCoverPath);
+         docs.imageCover = `data:image/jpeg;base64,${imageCover.toString('base64')}`;
+      } catch (err) {
+         logger.error('Error reading image:', err);
+      }
+   } else {
+      logger.error('Image not found for imageCover:', imageCoverPath);
+   }
+   if (Array.isArray(docs.images) && docs.images.length > 0) {
+      docs.images = docs.images
+         .map((image: string) => {
+            const imagePath = `${basePath}${image}`;
+            if (fs.existsSync(imagePath)) {
+               try {
+                  const imageFile = fs.readFileSync(imagePath);
+                  return `data:image/jpeg;base64,${imageFile.toString('base64')}`;
+               } catch (err) {
+                  logger.error('Error reading image:', err);
+                  return null;
+               }
+            } else {
+               return null;
+            }
+         })
+         .filter((image: any) => image !== null);
+   }
    next();
 });
 
