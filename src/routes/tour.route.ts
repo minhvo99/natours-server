@@ -32,7 +32,7 @@ tourRoute.get('/tours-within/:distance/center/:latlng/unit/:unit', getTourWithin
 tourRoute.get('/distances/:latlng/unit/:unit', getDistances);
 tourRoute
    .route('/')
-   .get(authorization, getAllTour)
+   .get(getAllTour)
    .post(authorization, restrictTo('admin', 'lead-guide'), createTour);
 tourRoute
    .route('/:id')

@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import slugify from 'slugify';
 import { ITour } from '../constans/Tour';
+import { enhanceDocsWithImages } from '../middlewares/tour.middleware';
 
 const tourSchemas = new Schema<ITour>(
    {
@@ -172,6 +173,8 @@ tourSchemas.pre(/^find/, function (this: Query<unknown, unknown>, next) {
    this.find({ secretTour: { $ne: true } });
    next();
 });
+
+tourSchemas.post(/^find/, enhanceDocsWithImages);
 
 // AGGREGATE MIDDLEWARE
 // tourSchemas.pre('aggregate', function (next) {

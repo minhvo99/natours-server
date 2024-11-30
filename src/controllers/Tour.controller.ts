@@ -41,7 +41,7 @@ export const reSizeTourImages = async (req: Request, res: Response, next: NextFu
          .resize(2000, 1333)
          .toFormat('jpeg')
          .jpeg({ quality: 90 })
-         .toFile(`publics/imgs/${req.body.imageCover}`);
+         .toFile(`publics/tours/${req.body.imageCover}`);
 
       //2) Images
       req.body.images = [];
@@ -53,7 +53,7 @@ export const reSizeTourImages = async (req: Request, res: Response, next: NextFu
                .resize(2000, 1333)
                .toFormat('jpeg')
                .jpeg({ quality: 90 })
-               .toFile(`publics/imgs/${fileName}`);
+               .toFile(`publics/tours/${fileName}`);
             req.body.images.push(fileName);
          }),
       );

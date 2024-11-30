@@ -7,3 +7,4 @@ logs
 http.http
 .idea
 package-lock.json
+publics/tours/
