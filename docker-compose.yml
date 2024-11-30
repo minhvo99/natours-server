@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-8080}
+
+      # MongoDB
+      MONGO_URI: mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}/${MONGODB_DB}?retryWrites=true&w=majority&appName=${CLUSTER}
+      
+      # JWT
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_EXPIRE_IN: ${JWT_EXPIRE_IN}
+      JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
+      JWT_COOKIE_EXPIRE_IN: ${JWT_COOKIE_EXPIRE_IN}
+
+      # Email Config
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+
+volumes:
+  mongodb-data:
