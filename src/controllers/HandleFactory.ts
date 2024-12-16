@@ -1,5 +1,5 @@
 import { Model, Document } from 'mongoose';
-import { NextFunction, Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
 import APIFeature from '../utils/apiFeature';

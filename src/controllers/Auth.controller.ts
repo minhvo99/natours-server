@@ -1,5 +1,5 @@
 import User from '../model/User.model';
-import { Request, Response, NextFunction, CookieOptions } from 'express';
+import express, { Request, Response, NextFunction, CookieOptions } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
 import dotenv from 'dotenv';

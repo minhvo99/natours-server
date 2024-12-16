@@ -1,9 +1,8 @@
-import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import appRouter from './routes/index';
 import db from './configs/database.config';
-import { NextFunction, Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import AppError from './utils/appError';
 import { errorHandler } from './controllers/Error.controller';
 import logger from './logger/winston';

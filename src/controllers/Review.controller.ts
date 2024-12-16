@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import Review from '../model/Review.model';
 import logger from '../logger/winston';
 import { deleteOne, updateOne, createOne, getOne } from './HandleFactory';
