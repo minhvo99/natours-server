@@ -1,5 +1,5 @@
 import nodemailer, { TransportOptions } from 'nodemailer';
-import { IUser } from 'src/constans/User';
+import { IUser } from '../constans/User';
 import pug from 'pug';
 import { convert } from 'html-to-text';
 

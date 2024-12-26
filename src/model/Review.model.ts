@@ -83,9 +83,8 @@ reviewSchemas.statics.calcAverageRating = async function (tourId: Types.ObjectId
    }
 };
 
-reviewSchemas.post('save', function () {
-   const ReviewModel = this.constructor as unknown as IReview;
-   ReviewModel.calcAverageRating(this.tour);
+reviewSchemas.post('save', async function () {
+   await (this.constructor as any).calcAverageRating(this.tour);
 });
 
 reviewSchemas.pre(/^findOneAnd/, async function (next) {
