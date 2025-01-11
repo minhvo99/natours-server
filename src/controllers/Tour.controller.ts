@@ -41,7 +41,7 @@ export const reSizeTourImages = async (req: Request, res: Response, next: NextFu
          .resize(2000, 1333)
          .toFormat('jpeg')
          .jpeg({ quality: 90 })
-         .toFile(`publics/tours/${req.body.imageCover}`);
+         .toFile(`publict/tours/${req.body.imageCover}`);
 
       //2) Images
       req.body.images = [];
