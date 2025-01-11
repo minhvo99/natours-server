@@ -12,10 +12,12 @@ export const enhanceDocsWithImages = function (docs: any, next: NextFunction) {
                const imageCover = fs.readFileSync(imageCoverPath);
                doc.imageCover = `data:image/jpeg;base64,${imageCover.toString('base64')}`;
             } catch (err) {
-               logger.error('Error reading imageCover:', err);
+               const defaultImageCover = fs.readFileSync('publict/tours/banner-01.jpg');
+               doc.imageCover = `data:image/jpeg;base64,${defaultImageCover.toString('base64')}`;
             }
          } else {
-            logger.error('Image not found for imageCover:', imageCoverPath);
+            const defaultImageCover = fs.readFileSync('publict/tours/banner-01.jpg');
+            doc.imageCover = `data:image/jpeg;base64,${defaultImageCover.toString('base64')}`;
          }
          if (Array.isArray(doc.images)) {
             doc.images = doc.images
@@ -26,15 +28,15 @@ export const enhanceDocsWithImages = function (docs: any, next: NextFunction) {
                         const imageFile = fs.readFileSync(imagePath);
                         return `data:image/jpeg;base64,${imageFile.toString('base64')}`;
                      } catch (err) {
-                        logger.error('Error reading image:', err);
-                        return null;
+                        const defaultImage = fs.readFileSync('publict/tours/banner-02.jpg');
+                        return `data:image/jpeg;base64,${defaultImage.toString('base64')}`;
                      }
                   } else {
-                     logger.error('Image not found:', imagePath);
-                     return null;
+                     const defaultImage = fs.readFileSync('publict/tours/banner-03.jpg');
+                     return `data:image/jpeg;base64,${defaultImage.toString('base64')}`;
                   }
                })
-               .filter((image: any) => image !== null);
+               .filter((image: any | string) => image !== null);
          }
       });
    } else {
@@ -46,10 +48,12 @@ export const enhanceDocsWithImages = function (docs: any, next: NextFunction) {
             const imageCover = fs.readFileSync(imageCoverPath);
             doc.imageCover = `data:image/jpeg;base64,${imageCover.toString('base64')}`;
          } catch (err) {
-            logger.error('Error reading imageCover:', err);
+            const defaultImage = fs.readFileSync('publict/tours/banner-02.jpg');
+            doc.imageCover = `data:image/jpeg;base64,${defaultImage.toString('base64')}`;
          }
       } else {
-         logger.error('Image not found for imageCover:', imageCoverPath);
+         const defaultImage = fs.readFileSync('publict/tours/banner-03.jpg');
+         doc.imageCover = `data:image/jpeg;base64,${defaultImage.toString('base64')}`;
       }
 
       if (Array.isArray(doc.images)) {
@@ -61,12 +65,12 @@ export const enhanceDocsWithImages = function (docs: any, next: NextFunction) {
                      const imageFile = fs.readFileSync(imagePath);
                      return `data:image/jpeg;base64,${imageFile.toString('base64')}`;
                   } catch (err) {
-                     logger.error('Error reading image:', err);
-                     return null;
+                     const defaultImage = fs.readFileSync('publict/tours/banner-02.jpg');
+                     return `data:image/jpeg;base64,${defaultImage.toString('base64')}`;
                   }
                } else {
-                  logger.error('Image not found:', imagePath);
-                  return null;
+                  const defaultImage = fs.readFileSync('publict/tours/banner-02.jpg');
+                  return `data:image/jpeg;base64,${defaultImage.toString('base64')}`;
                }
             })
             .filter((image: any) => image !== null);
