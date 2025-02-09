@@ -73,6 +73,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
       const users = await User.find({ active: { $ne: false } });
       res.status(200).json({
          message: 'Get all users successfully!',
+         total: users.length,
          data: users,
       });
    } catch (error) {
