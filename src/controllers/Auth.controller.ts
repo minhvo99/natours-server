@@ -1,5 +1,5 @@
 import User from '../model/User.model';
-import express, { Request, Response, NextFunction, CookieOptions } from 'express';
+import { Request, Response, NextFunction, CookieOptions } from 'express';
 import logger from '../logger/winston';
 import AppError from '../utils/appError';
 import dotenv from 'dotenv';
@@ -8,6 +8,9 @@ import { signToken } from '../utils/auth';
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
 import Email from '../utils/email';
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 dotenv.config();
 const SERECT = process.env.JWT_SECRET_KEY as Secret;
@@ -81,6 +84,37 @@ export const logIn = async (req: Request, res: Response, next: NextFunction) => 
       }
       createSendToken(user, 200, res);
    } catch (error) {
+      logger.error(`Login error: ${error}`);
+      next(error);
+   }
+};
+
+export const loginWithGoogle = async (req: Request, res: Response, next: NextFunction) => {
+   const { idToken } = req.body;
+   try {
+      const ticket = await client.verifyIdToken({
+         idToken,
+         audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const { sub, name, email, picture } = ticket.getPayload() as any;
+      let user = await User.findOne({ email });
+
+      if (!user) {
+         user = await User.create({
+            name,
+            email,
+            password: 'google-auth', // default
+            passWordConfirm: 'google-auth',
+            passWordChangeAt: null,
+            photo: picture,
+         });
+         // await User.create({ googleId: sub, name, email, avatar: picture });
+      }
+
+      createSendToken(user, 200, res);
+   } catch (error) {
+      res.status(401).json({ message: 'Invalid token' });
       logger.error(`Login error: ${error}`);
       next(error);
    }

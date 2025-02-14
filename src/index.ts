@@ -9,10 +9,13 @@ import logger from './logger/winston';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
+import { config } from 'dotenv';
+import session from 'express-session';
 // import bodyParser from 'body-parser';
 // import {xss} from 'xss-clean/lib/xss';
 
 //Connect to db
+config();
 db.connect();
 const app = express();
 // Set security HHTP headers
@@ -34,6 +37,19 @@ const limiter = rateLimit({
    legacyHeaders: false,
    message: 'Too many request from this IP, please try again in an hour!',
 });
+
+// config session
+
+app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
+app.use(
+   session({
+      secret: process.env.SESSION_SECRET || '',
+      resave: false,
+      saveUninitialized: true,
+   }),
+);
+
+// Passport middleware
 
 app.use('/api', limiter);
 
