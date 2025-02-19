@@ -135,7 +135,7 @@ export const loginWithGoogle = async (req: Request, res: Response, next: NextFun
 export const authorization = async (req: Request, res: Response, next: NextFunction) => {
    try {
       //1) getting token and check of if's there
-      let token = req.cookies.jwt || '';
+      let token = '';
       if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
          token = req.headers.authorization.split(' ')[1];
       }
@@ -147,6 +147,7 @@ export const authorization = async (req: Request, res: Response, next: NextFunct
       try {
          decoded = jwt.verify(token, SERECT);
       } catch (err) {
+         logger.error('Authorization fail: ' + err);
          return next(new AppError('Invalid or expired token', 401));
       }
 
