@@ -9,6 +9,7 @@ import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
 import Email from '../utils/email';
 import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
+import bcrypt from 'bcryptjs';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -22,6 +23,7 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
          Date.now() + Number(process.env.JWT_COOKIE_EXPIRE_IN) * 24 * 60 * 60 * 1000, //90days
       ),
       httpOnly: true,
+      sameSite: 'strict', // block CSRF attack
    };
 
    if (process.env.NODE_ENV === 'production') cookieOption.secure = true;
@@ -80,6 +82,8 @@ export const logIn = async (req: Request, res: Response, next: NextFunction) => 
       }
 
       if (!user || !user.active) {
+         // Handling fake bcrypt to avoid timing attacks
+         await bcrypt.compare(password, '$2a$10$invalidinvalidinvalidinvalidinvalid');
          return next(new AppError('User account is inactive or does not exist.', 404));
       }
       createSendToken(user, 200, res);
@@ -97,7 +101,17 @@ export const loginWithGoogle = async (req: Request, res: Response, next: NextFun
          audience: process.env.GOOGLE_CLIENT_ID,
       });
 
-      const { sub, name, email, picture } = ticket.getPayload() as any;
+      const payload = ticket.getPayload();
+      if (!payload) {
+         return next(new AppError('Invalid Google token', 401));
+      }
+
+      const { sub, name, email, picture, exp } = ticket.getPayload() as any;
+
+      if (exp * 1000 < Date.now()) {
+         return next(new AppError('Google token has expired', 401));
+      }
+
       let user = await User.findOne({ email });
 
       if (!user) {
@@ -109,21 +123,19 @@ export const loginWithGoogle = async (req: Request, res: Response, next: NextFun
             passWordChangeAt: null,
             photo: picture,
          });
-         // await User.create({ googleId: sub, name, email, avatar: picture });
       }
 
       createSendToken(user, 200, res);
    } catch (error) {
-      res.status(401).json({ message: 'Invalid token' });
-      logger.error(`Login error: ${error}`);
-      next(error);
+      logger.error(`Google login error: ${error}`);
+      next(new AppError('Google authentication failed', 401));
    }
 };
 
 export const authorization = async (req: Request, res: Response, next: NextFunction) => {
    try {
       //1) getting token and check of if's there
-      let token = '';
+      let token = req.cookies.jwt || '';
       if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
          token = req.headers.authorization.split(' ')[1];
       }
@@ -131,7 +143,12 @@ export const authorization = async (req: Request, res: Response, next: NextFunct
          return next(new AppError('You are not logged in!', 401));
       }
       //2) verify token
-      const decoded: string | JwtPayload = jwt.verify(token, SERECT);
+      let decoded: string | JwtPayload;
+      try {
+         decoded = jwt.verify(token, SERECT);
+      } catch (err) {
+         return next(new AppError('Invalid or expired token', 401));
+      }
 
       // 3) Check if user still exists
       const currentUser = await User.findById((decoded as JwtPayload).id).select('+active');
