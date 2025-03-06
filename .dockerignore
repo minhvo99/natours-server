@@ -1,5 +1,5 @@
 node_modules
-publict
+dist
 .git
 Dockerfile
 docker-compose.yml

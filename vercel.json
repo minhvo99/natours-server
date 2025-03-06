@@ -3,10 +3,10 @@
    "builds": [
       {
          "build": "node build --output public",
-         "src": "publict/index.js",
+         "src": "public/index.js",
          "use": "@vercel/node",
          "config": {
-            "distDir": "publict",
+            "distDir": "dist",
             "includeFiles": ["src/**/*.ts"]
          }
       }
@@ -14,7 +14,7 @@
    "rewrites": [
       {
          "source": "/api/v1/(.*)",
-         "destination": "/publict/index.js"
+         "destination": "/dist/index.js"
       }
    ]
 }

@@ -6,7 +6,7 @@
       "esModuleInterop": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
-      "outDir": "./publict",
+      "outDir": "./dist",
       "rootDir": "./src",
       "resolveJsonModule": true,
       "typeRoots": ["./node_modules/@types"],
@@ -25,5 +25,5 @@
       ]
    },
    "include": ["src/**/*.ts"],
-   "exclude": ["node_modules", "publict"]
+   "exclude": ["node_modules", "dist"]
 }

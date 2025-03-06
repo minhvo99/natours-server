@@ -1,6 +1,6 @@
 node_modules
 .env
-publict/
+dist/
 logs
 .dev.env
 logs
