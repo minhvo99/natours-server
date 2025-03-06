@@ -1,5 +1,8 @@
 {
    "version": 2,
+   "scripts": {
+      "build": "node build --output public"
+   },
    "builds": [
       {
          "src": "publict/index.js",
