@@ -2,7 +2,7 @@
 
 ### command build for windown
 
-`"build": "del /q dist\\* && npx tsc"`
+`"build": "del /q publict\\* && npx tsc"`
 
 ## How To Use
 
