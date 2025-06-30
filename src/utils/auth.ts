@@ -3,11 +3,15 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 dotenv.config();
 const SERECT = process.env.JWT_SECRET_KEY as Secret;
-const expiresIn = process.env.JWT_EXPIRE_IN;
+const REFRESH_SERECT = process.env.JWT_REFRESH_KEY as Secret;
+const accessTokenExpiresIn = process.env.JWT_EXPIRE_IN || '1h'; 
+const refreshTokenExpiresIn = process.env.JWT_REFRESH_KEY_EXPIRE_IN || '7d';
 
-export const signToken = (user: any): string => {
-   const { id, name } = user;
-   return jwt.sign({ id, name }, SERECT, { expiresIn: expiresIn });
+export const signToken = (user: any) => {
+   const { id } = user;
+   const accessToken = jwt.sign({ id }, SERECT, { expiresIn: accessTokenExpiresIn });
+   const refreshToken = jwt.sign({ id }, REFRESH_SERECT, { expiresIn: refreshTokenExpiresIn });
+   return { accessToken, refreshToken };
 };
 
 // export const refreshToken =
