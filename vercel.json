@@ -1,19 +1,7 @@
 {
    "version": 2,
-   "buildCommand": "npm run build",
-   "outputDirectory": "dist",
-   "rewrites": [
-      {
-         "source": "/(.*)",
-         "destination": "/dist/index.js"
-      }
-   ],
-   "env": {
-      "NODE_ENV": "production"
-   },
-   "functions": {
-      "dist/index.js": {
-         "maxDuration": 60
-      }
-   }
+   "rewrites": [{ 
+      "source": "/(.*)", 
+      "destination": "/api" 
+   }]
 }
